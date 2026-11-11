@@ -1,0 +1,20 @@
+# Agentic RAG & Financial Compliance Engine - Core Dependencies
+docling
+qdrant-client
+fastembed
+flashrank
+langgraph
+langchain-core
+langchain-groq
+langchain-text-splitters
+pydantic
+pydantic-settings
+fastapi
+uvicorn[standard]
+streamlit
+ragas
+langfuse
+httpx
+pytest
+python-dotenv
+tiktoken
