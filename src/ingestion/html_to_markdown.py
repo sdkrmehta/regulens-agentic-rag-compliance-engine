@@ -1,4 +1,4 @@
-"""RBI Gazette HTML-to-Markdown Converter with Table Preservation and Page Marker Injection."""
+"""RBI Gazette HTML-to-Markdown Converter with Table Preservation and Genuine Structural Provenance."""
 
 import re
 from pathlib import Path
@@ -11,7 +11,7 @@ CLAUSE_HEADER_RE = re.compile(
 
 
 def table_to_markdown(table_tag: Tag) -> str:
-    """Convert an HTML table to a clean Markdown pipe table."""
+    """Convert an HTML table to a clean Markdown pipe table preserving all columns and headers."""
     rows = []
     max_cols = 0
 
@@ -46,6 +46,10 @@ def table_to_markdown(table_tag: Tag) -> str:
 
 
 def convert_rbi_html_to_markdown(html_path: Path, doc_category: str) -> str:
+    """
+    Parse RBI Gazette HTML document into structured Markdown.
+    Preserves headings, clause hierarchies, and multi-row tables without artificial character-based page splitting.
+    """
     with open(html_path, "r", encoding="utf-8", errors="ignore") as f:
         soup = BeautifulSoup(f, "html.parser")
 
@@ -53,16 +57,15 @@ def convert_rbi_html_to_markdown(html_path: Path, doc_category: str) -> str:
     if not container:
         container = soup.find("div", id="accordion") or soup.body
 
-    # Remove superscript footnotes so numbering like "18. 62REs" becomes clean "18. REs"
+    if not container:
+        return ""
+
+    # Remove superscript footnotes to prevent breaking numbered clause headers (e.g., '18. 62REs' -> '18. REs')
     for sup in container.find_all("sup"):
         sup.decompose()
 
     blocks = []
-    chars_per_page = 2200
-    current_char_count = 0
-    current_page = 1
-
-    blocks.append(f"<!-- PAGE_NUMBER: {current_page} -->\n")
+    current_section = 1
 
     for el in container.find_all(["h1", "h2", "h3", "h4", "p", "table"]):
         if el.name in ["h1", "h2", "h3", "h4"]:
@@ -70,38 +73,25 @@ def convert_rbi_html_to_markdown(html_path: Path, doc_category: str) -> str:
             if text:
                 level = el.name
                 prefix = "#" if level == "h1" else "##" if level == "h2" else "###"
-                block = f"\n\n{prefix} {text}\n\n"
-                blocks.append(block)
-                current_char_count += len(block)
+                blocks.append(f"\n\n{prefix} {text}\n\n")
         elif el.name == "table" and el.get("class") != ["tablebg"]:
+            # Only convert leaf tables
             if not el.find("table"):
                 tbl_md = table_to_markdown(el)
                 if tbl_md.strip():
                     blocks.append(f"\n\n{tbl_md}\n\n")
-                    current_char_count += len(tbl_md)
         elif el.name == "p":
             if el.find("table"):
                 continue
             text = el.get_text(separator=" ", strip=True)
             if text and len(text) > 5:
-                # If matches statutory clause header or is a designated heading class
                 is_clause_header = bool(CLAUSE_HEADER_RE.match(text))
                 if not is_clause_header and el.get("class") and "head" in el.get("class"):
                     is_clause_header = True
 
                 if is_clause_header:
-                    block = f"\n\n### {text}\n\n"
+                    blocks.append(f"\n\n### {text}\n\n")
                 else:
-                    block = f"\n\n{text}\n\n"
-                blocks.append(block)
-                current_char_count += len(block)
+                    blocks.append(f"\n\n{text}\n\n")
 
-        # Page-number boundary injection
-        if current_char_count >= chars_per_page:
-            current_page += 1
-            blocks.append(f"\n<!-- PAGE_NUMBER: {current_page} -->\n")
-            current_char_count = 0
-
-    full_md = "".join(blocks)
-    full_md = re.sub(r"\n{3,}", "\n\n", full_md)
-    return full_md
+    return "".join(blocks).strip()

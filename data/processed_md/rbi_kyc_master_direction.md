@@ -1,3 +1,5 @@
+<!-- DOCUMENT_METADATA: {"document_id": "RBI_KYC_2016", "title": "Master Direction - Know Your Customer (KYC) Direction, 2016", "circular_number": "RBI/DBR/2015-16/18", "date": "2016-02-25", "status": "ACTIVE", "amended_date": "2024-01-04"} -->
+
 <!-- PAGE_NUMBER: 1 -->
 
 ### RBI/DBR/2015-16/18 Master Direction DBR.AML.BC.No.81/14.01.001/2015-16

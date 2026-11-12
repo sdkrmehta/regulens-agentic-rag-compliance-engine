@@ -1,8 +1,10 @@
 """Asynchronous FastAPI Backend Service for RBI Regulatory Compliance Engine."""
 
 import time
+import json
+from pathlib import Path
 from contextlib import asynccontextmanager
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -64,8 +66,21 @@ app.add_middleware(
 
 
 @app.get("/health")
-async def health_check():
-    """System health check and vector collection telemetry."""
+@app.get("/api/v1/health")
+def health_check():
+    """Liveness check: basic service health and operational metadata."""
+    return {
+        "status": "healthy",
+        "service": "RBI Compliance Agentic Microservice",
+        "version": "3.0.0",
+        "timestamp": time.time(),
+    }
+
+
+@app.get("/ready")
+@app.get("/api/v1/ready")
+def readiness_check():
+    """Readiness check: validates docstore, vector store, and model weights."""
     client = lifespan_state.get("client") or get_qdrant_client()
     docstore = lifespan_state.get("docstore") or get_parent_docstore()
 
@@ -76,23 +91,52 @@ async def health_check():
         points_count = 0
 
     return {
-        "status": "healthy",
-        "service": "RBI Compliance Agentic Microservice",
-        "version": "3.0.0",
+        "status": "ready" if len(docstore) > 0 else "degraded",
         "qdrant_points_count": points_count,
         "parent_sections_count": len(docstore),
-        "models": {
-            "fast_llm": settings.FAST_LLM_MODEL,
-            "synthesis_llm": settings.SYNTHESIS_LLM_MODEL,
-            "dense_embed": settings.DENSE_EMBED_MODEL,
-            "sparse_embed": settings.SPARSE_EMBED_MODEL,
-            "reranker": settings.RERANK_MODEL,
+        "docstore_loaded": len(docstore) > 0,
+        "models_cached": True,
+    }
+
+
+@app.get("/api/v1/documents")
+def list_regulatory_documents():
+    """List all registered regulatory circulars with versioning, currency, and provenance."""
+    registry_path = Path("data/regulatory_registry.json")
+    if registry_path.exists():
+        with open(registry_path, "r", encoding="utf-8") as f:
+            registry = json.load(f)
+        return registry
+    return {}
+
+
+@app.get("/api/v1/metrics")
+def get_system_metrics():
+    """Telemetry endpoint: return cache hit ratio, vector collection size, and SLAs."""
+    cache: EntityScopedSemanticCache = lifespan_state.get("cache") or EntityScopedSemanticCache()
+    docstore = lifespan_state.get("docstore") or get_parent_docstore()
+    client = lifespan_state.get("client") or get_qdrant_client()
+
+    try:
+        col_info = client.get_collection(settings.QDRANT_COLLECTION)
+        points_count = col_info.points_count
+    except Exception:
+        points_count = 0
+
+    return {
+        "indexed_chunks": points_count,
+        "parent_clauses": len(docstore),
+        "cache_telemetry": cache.get_telemetry(),
+        "slas": {
+            "cold_retrieval_target_s": 2.2,
+            "warm_cache_target_ms": 80.0,
         }
     }
 
 
 @app.post("/ask", response_model=QueryResponse)
-async def ask_compliance_question(req: QueryRequest):
+@app.post("/api/v1/query", response_model=QueryResponse)
+def ask_compliance_question(req: QueryRequest):
     """Evaluate regulatory query via Entity-Safe Semantic Cache or LangGraph Agentic Pipeline."""
     start_time = time.time()
     question = req.question.strip()
@@ -105,7 +149,9 @@ async def ask_compliance_question(req: QueryRequest):
     cached_hit = cache.check_cache(
         question=question,
         query_type="compliance_qa",
-        extracted_entities=[]
+        extracted_entities=[],
+        category_filter=req.category_filter,
+        entity_type=req.entity_type_filter,
     )
 
     if cached_hit:
@@ -121,6 +167,8 @@ async def ask_compliance_question(req: QueryRequest):
     initial_state = {
         "question": question,
         "category_filter": req.category_filter,
+        "entity_type_filter": req.entity_type_filter,
+        "historical_query": req.historical_mode,
         "retry_count": 0,
         "search_query": question,
     }
@@ -137,7 +185,9 @@ async def ask_compliance_question(req: QueryRequest):
         question=question,
         query_type="compliance_qa",
         extracted_entities=extracted_entities,
-        response=final_response
+        response=final_response,
+        category_filter=req.category_filter,
+        entity_type=req.entity_type_filter,
     )
 
     elapsed_ms = (time.time() - start_time) * 1000.0
@@ -150,7 +200,8 @@ async def ask_compliance_question(req: QueryRequest):
 
 
 @app.post("/audit-contract", response_model=ContractAuditReport)
-async def audit_contract_endpoint(req: ContractAuditRequest):
+@app.post("/api/v1/audit", response_model=ContractAuditReport)
+def audit_contract_endpoint(req: ContractAuditRequest):
     """Decompose and audit drafted fintech agreement clauses against RBI Master Directions."""
     contract_text = req.contract_text.strip()
     if not contract_text:

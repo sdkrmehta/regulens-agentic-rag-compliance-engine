@@ -1,5 +1,6 @@
-"""LangGraph Node implementations for RBI Compliance Agent."""
+"""LangGraph Node implementations for RBI Compliance Agent with Source-Specific Verification."""
 
+import re
 import time
 from typing import Dict, Any, List, Optional
 
@@ -22,7 +23,7 @@ from src.agent.prompts import (
     QUERY_REWRITER_PROMPT,
     GENERATOR_SYSTEM_PROMPT,
 )
-from src.agent.verifier import verify_citation_quote
+from src.agent.verifier import verify_citation_against_source
 from src.retrieval.vector_store import RBIHybridVectorStore
 
 # Shared vector store singleton
@@ -45,13 +46,35 @@ def get_llm(model_name: str, temperature: float = 0.0, max_tokens: int = 1024) -
         temperature=temperature,
         max_tokens=max_tokens,
         api_key=api_key,
+        request_timeout=4.0,
+        max_retries=1,
     )
+
+
+def sanitize_input_prompt(query: str) -> str:
+    """Sanitize user query against obvious prompt injection and jailbreak attempts."""
+    injection_patterns = [
+        r"ignore\s+(?:all\s+)?(?:previous\s+)?(?:regulatory\s+|system\s+)?instructions?",
+        r"system\s+prompt",
+        r"you\s+are\s+now\s+an\s+unrestricted",
+        r"disregard\s+(?:the\s+)?above",
+        r"output\s+your\s+instructions",
+    ]
+    for pat in injection_patterns:
+        if re.search(pat, query, re.IGNORECASE):
+            return "Prompt injection pattern detected. Provide standard compliance inquiry."
+    return query[:1500].strip()
 
 
 def router_node(state: AgentState) -> Dict[str, Any]:
     """Classify user intent, extract acronyms/entities, and generate expanded query."""
-    question = state.get("question", "")
+    raw_question = state.get("question", "")
+    question = sanitize_input_prompt(raw_question)
     llm = get_llm(settings.FAST_LLM_MODEL, temperature=0.0)
+
+    # Detect explicit historical intent
+    q_lower = question.lower()
+    is_historical = any(k in q_lower for k in ["2022 guidelines", "old guidelines", "repealed", "historical", "prior to 2025", "earlier circular"])
 
     if llm:
         structured_llm = llm.with_structured_output(RouterOutput)
@@ -64,6 +87,8 @@ def router_node(state: AgentState) -> Dict[str, Any]:
             return {
                 "query_type": output.query_type,
                 "extracted_entities": output.extracted_entities,
+                "target_category": output.target_category,
+                "historical_query": is_historical or output.historical_query,
                 "search_query": output.search_query or question,
                 "retry_count": state.get("retry_count", 0),
             }
@@ -71,13 +96,13 @@ def router_node(state: AgentState) -> Dict[str, Any]:
             print(f"[WARNING] Router LLM call failed: {e}. Using deterministic fallback.")
 
     # Rule-based fallback router
-    q_lower = question.lower()
     out_of_scope_keywords = ["weather", "cricket", "movie", "recipe", "stock market tips", "personal tax advice"]
     if any(k in q_lower for k in out_of_scope_keywords):
         return {
             "query_type": "out_of_scope",
             "extracted_entities": [],
             "search_query": question,
+            "historical_query": False,
             "retry_count": state.get("retry_count", 0),
         }
 
@@ -87,6 +112,7 @@ def router_node(state: AgentState) -> Dict[str, Any]:
             "query_type": "contract_audit",
             "extracted_entities": ["Contract Clause"],
             "search_query": question,
+            "historical_query": False,
             "retry_count": state.get("retry_count", 0),
         }
 
@@ -97,30 +123,35 @@ def router_node(state: AgentState) -> Dict[str, Any]:
         "query_type": "compliance_qa",
         "extracted_entities": found_entities,
         "search_query": question,
+        "historical_query": is_historical,
         "retry_count": state.get("retry_count", 0),
     }
-
-
-import re
 
 
 def retrieve_node(state: AgentState) -> Dict[str, Any]:
     """Execute hybrid dense + sparse search and cross-encoder reranking."""
     search_query = state.get("search_query") or state.get("question", "")
-    category_filter = state.get("category_filter")
-    store = get_vector_store()
+    category_filter = state.get("category_filter") or state.get("target_category")
+    historical_mode = state.get("historical_query", False)
 
-    parents = store.hybrid_search_and_rerank(
-        query=search_query,
-        doc_category=category_filter,
-        prefetch_limit=settings.RRF_PREFETCH_LIMIT,
-        top_k=settings.RERANK_TOP_K,
-    )
+    try:
+        store = get_vector_store()
+        parents = store.hybrid_search_and_rerank(
+            query=search_query,
+            doc_category=category_filter,
+            historical_mode=historical_mode,
+            prefetch_limit=settings.RRF_PREFETCH_LIMIT,
+            top_k=settings.RERANK_TOP_K,
+        )
+    except Exception as e:
+        print(f"[WARNING] Vector store retrieval failed: {e}. Falling back to empty parents.")
+        parents = []
+
     return {"retrieved_parents": parents}
 
 
 def grader_node(state: AgentState) -> Dict[str, Any]:
-    """Single-call batch grader: pack all 4 parents into 1 call to llama-3.1-8b-instant."""
+    """Single-call batch grader: evaluate relevance and authority of retrieved parents."""
     retrieved = state.get("retrieved_parents", [])
     if not retrieved:
         return {"graded_parents": []}
@@ -131,7 +162,7 @@ def grader_node(state: AgentState) -> Dict[str, Any]:
     if llm:
         structured_llm = llm.with_structured_output(BatchGradeOutput)
         docs_text = "\n\n".join([
-            f"--- Parent Document ID: {p['parent_id']} ---\n{p['text']}"
+            f"--- Parent Document ID: {p['parent_id']} | Status: {p.get('document_status', 'ACTIVE')} ---\n{p['text']}"
             for p in retrieved
         ])
         messages = [
@@ -140,29 +171,28 @@ def grader_node(state: AgentState) -> Dict[str, Any]:
         ]
         try:
             output: BatchGradeOutput = structured_llm.invoke(messages)
-            relevant_ids = {g.parent_id for g in output.grades if g.is_relevant}
+            relevant_ids = {g.parent_id for g in output.grades if g.is_relevant and g.is_authoritative}
             graded = [p for p in retrieved if p["parent_id"] in relevant_ids]
             return {"graded_parents": graded}
         except Exception as e:
             print(f"[WARNING] Grader LLM call failed: {e}. Using deterministic heuristic.")
 
-    # Rule-based relevance check if no API key or call failed
+    # Rule-based relevance check
     q_words = set(re.findall(r"\w+", question.lower())) - {"what", "is", "the", "under", "for", "and", "in", "to", "how", "are", "of"}
     graded = []
     for p in retrieved:
         p_text = p.get("text", "").lower()
-        # If question is explicitly unanswerable
         if "cryptocurrency mining" in question.lower() or "crypto mining" in question.lower():
             continue
         overlap = sum(1 for w in q_words if w in p_text)
-        if overlap >= 2 or p.get("rerank_score", 0.0) > 0.15:
+        if overlap >= 2 or p.get("rrf_score", 0.0) > 0.015:
             graded.append(p)
 
     return {"graded_parents": graded}
 
 
 def rewriter_node(state: AgentState) -> Dict[str, Any]:
-    """Acronym-aware query rewriter node."""
+    """Acronym-aware query rewriter node preserving statutory scope and intent."""
     question = state.get("question", "")
     search_query = state.get("search_query", question)
     current_retries = state.get("retry_count", 0)
@@ -198,7 +228,10 @@ def rewriter_node(state: AgentState) -> Dict[str, Any]:
 
 
 def generator_node(state: AgentState) -> Dict[str, Any]:
-    """Flagship Cited Answer Generator (70B Model) paired with deterministic quote verification."""
+    """
+    Flagship Cited Answer Generator paired with source-specific quote verification.
+    Never fabricates fallback citations or passes unverified answers as verified.
+    """
     question = state.get("question", "")
     graded_parents = state.get("graded_parents", [])
 
@@ -209,7 +242,7 @@ def generator_node(state: AgentState) -> Dict[str, Any]:
     if llm:
         structured_llm = llm.with_structured_output(CitedResponse)
         context_str = "\n\n".join([
-            f"=== Source Document: {p.get('circular_name')} | Clause: {p.get('section_clause')} | Page: {p.get('page_number')} ===\n{p.get('text')}"
+            f"=== Document ID: {p.get('document_id')} | Title: {p.get('circular_name')} | Clause: {p.get('section_clause')} | Page: {p.get('page_number')} | Location: {p.get('source_location')} ===\n{p.get('text')}"
             for p in graded_parents
         ])
         messages = [
@@ -218,33 +251,48 @@ def generator_node(state: AgentState) -> Dict[str, Any]:
         ]
         try:
             resp: CitedResponse = structured_llm.invoke(messages)
-            # Deterministic Python quote verification on every citation
+
+            # Strict source-specific verification on every cited quote
+            verified_citations = []
+            has_unverified = False
+
             for cit in resp.citations:
-                cit.verified = verify_citation_quote(cit.verbatim_quote, graded_parents)
+                is_v, v_status, reason = verify_citation_against_source(cit, graded_parents)
+                cit.verified = is_v
+                cit.verification_status = v_status
+                verified_citations.append(cit)
+                if not is_v:
+                    has_unverified = True
+
+            resp.citations = verified_citations
+
+            # Recompute risk and evidence sufficiency based on verification results
+            if not verified_citations:
+                resp.evidence_sufficiency = "INSUFFICIENT"
+                resp.risk_level = "UNVERIFIED"
+            elif has_unverified:
+                resp.evidence_sufficiency = "PARTIAL"
+                if resp.risk_level == "LOW":
+                    resp.risk_level = "MEDIUM"
+
             return {"final_response": resp}
         except Exception as e:
-            print(f"[WARNING] Generator 70B call failed: {e}. Generating deterministic cited fallback.")
+            print(f"[WARNING] Generator 70B call failed: {e}. Returning unverified fallback state.")
 
-    # Deterministic cited response when no API key is present
+    # Honest unverified response when LLM is unavailable (No fabricated quotations!)
     top_doc = graded_parents[0]
-    sample_quote = " ".join(top_doc.get("text", "").split()[:15])
-    citation = CitationItem(
-        circular_name=top_doc.get("circular_name", "RBI Regulatory Master Direction"),
-        section_clause=top_doc.get("section_clause", "Statutory Clause"),
-        page_number=top_doc.get("page_number", 1),
-        verbatim_quote=sample_quote,
-        verified=verify_citation_quote(sample_quote, graded_parents),
-    )
-
-    fallback_answer = (
-        f"Based on the official {top_doc.get('circular_name')} ({top_doc.get('section_clause')}), "
-        f"the applicable statutory provisions state that: {sample_quote}."
+    honest_answer = (
+        f"Retrieved authoritative regulatory provision from {top_doc.get('circular_name')} "
+        f"({top_doc.get('section_clause')}). Automated LLM synthesis is currently unavailable. "
+        f"Please inspect the underlying statutory section directly."
     )
 
     resp = CitedResponse(
-        answer=fallback_answer,
-        citations=[citation],
-        risk_level="MEDIUM" if "risk" in top_doc.get("text", "").lower() else "INFO",
+        answer=honest_answer,
+        citations=[],
+        risk_level="UNVERIFIED",
+        evidence_sufficiency="PARTIAL",
+        applicable_status=top_doc.get("document_status", "ACTIVE")
     )
     return {"final_response": resp}
 
@@ -256,6 +304,7 @@ def out_of_scope_node(state: AgentState) -> Dict[str, Any]:
                "The compliance engine is dedicated strictly to RBI Master Directions on KYC, Digital Lending, and Cyber Resilience.",
         citations=[],
         risk_level="INFO",
+        evidence_sufficiency="INSUFFICIENT",
     )
     return {"final_response": resp}
 
@@ -267,5 +316,6 @@ def fallback_node(state: AgentState) -> Dict[str, Any]:
                "(KYC, Digital Lending, Cyber Resilience) to verify this query.",
         citations=[],
         risk_level="UNVERIFIED",
+        evidence_sufficiency="INSUFFICIENT",
     )
     return {"final_response": resp}

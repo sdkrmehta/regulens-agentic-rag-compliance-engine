@@ -32,7 +32,7 @@ class Settings(BaseSettings):
     DENSE_EMBED_MODEL: str = "BAAI/bge-small-en-v1.5"
     SPARSE_EMBED_MODEL: str = "Qdrant/bm25"
     RERANK_MODEL: str = "ms-marco-MiniLM-L-12-v2"
-    RRF_PREFETCH_LIMIT: int = 15
+    RRF_PREFETCH_LIMIT: int = 10
     RERANK_TOP_K: int = 4
 
     # Agent Guardrails and Thresholds

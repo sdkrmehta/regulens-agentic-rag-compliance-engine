@@ -1,3 +1,5 @@
+<!-- DOCUMENT_METADATA: {"document_id": "RBI_CYBER_2024", "title": "Master Directions on Cyber Resilience and Digital Payment Security Controls for non-bank Payment System Operators", "circular_number": "RBI/DPSS/2024-25/123", "date": "2024-07-30", "status": "ACTIVE"} -->
+
 <!-- PAGE_NUMBER: 1 -->
 
 RBI/DPSS/2024-25/123 CO.DPSS.OVRST.No.S447/06-26-002/2024-25

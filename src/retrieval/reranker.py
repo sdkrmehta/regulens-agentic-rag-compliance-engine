@@ -48,7 +48,7 @@ class FlashRankReranker:
             doc_map[doc_id] = doc
             passages.append({
                 "id": doc_id,
-                "text": doc.get("text", ""),
+                "text": doc.get("text", "")[:1200],  # Bound within cross-encoder context window for fast inference
                 "meta": {
                     "circular_name": doc.get("circular_name", ""),
                     "section_clause": doc.get("section_clause", ""),
