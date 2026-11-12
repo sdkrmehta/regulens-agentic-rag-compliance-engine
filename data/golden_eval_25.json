@@ -1,0 +1,227 @@
+[
+  {
+    "question_id": "Q01",
+    "tier": "Tier A",
+    "question": "Within how many hours must an authorized Payment System Operator report a cyber security incident to CERT-In and RBI?",
+    "ground_truth": "The PSO shall report unusual cyber incidents including cyber attacks and outages to RBI and CERT-In within 6 hours of detection.",
+    "expected_circular": "RBI Cyber Resilience and Payment Security Directions",
+    "expected_clause": "22. Incident Response",
+    "category": "CYBER_RESILIENCE"
+  },
+  {
+    "question_id": "Q02",
+    "tier": "Tier A",
+    "question": "What is the minimum cooling-off period for digital loans having a tenor of seven days or more under Digital Lending Directions?",
+    "ground_truth": "The cooling off/look-up period determined by the Board of the RE shall not be less than three days for loans having tenor of seven days or more, and one day for loans having tenor of less than seven days.",
+    "expected_circular": "RBI Guidelines on Digital Lending",
+    "expected_clause": "8. Cooling off/look-up period",
+    "category": "DIGITAL_LENDING"
+  },
+  {
+    "question_id": "Q03",
+    "tier": "Tier A",
+    "question": "Whose approval is mandatory before onboarding a Politically Exposed Person (PEP) as a customer?",
+    "ground_truth": "Decision to open an account for a Politically Exposed Person (PEP) shall be taken at a senior management level.",
+    "expected_circular": "RBI Master Direction on KYC",
+    "expected_clause": "41. Politically Exposed Persons (PEPs)",
+    "category": "KYC"
+  },
+  {
+    "question_id": "Q04",
+    "tier": "Tier A",
+    "question": "What is the definition of Annual Percentage Rate (APR) under Digital Lending Guidelines?",
+    "ground_truth": "APR is the effective annualised rate charged to the borrower of a digital loan, representing the all-inclusive cost of digital credit including all fees and charges.",
+    "expected_circular": "RBI Guidelines on Digital Lending",
+    "expected_clause": "2. Definitions",
+    "category": "DIGITAL_LENDING"
+  },
+  {
+    "question_id": "Q05",
+    "tier": "Tier A",
+    "question": "Can digital lending loan disbursals be routed through a third-party pool account of a Lending Service Provider (LSP)?",
+    "ground_truth": "All loan disbursals and repayments must be executed directly between the bank account of the borrower and the regulated entity without passing through any pool account of an LSP or third party.",
+    "expected_circular": "RBI Guidelines on Digital Lending",
+    "expected_clause": "3. Loan Disbursal, Servicing and Repayment",
+    "category": "DIGITAL_LENDING"
+  },
+  {
+    "question_id": "Q06",
+    "tier": "Tier A",
+    "question": "Who must approve the Cyber Crisis Management Plan (CCMP) of a Payment System Operator?",
+    "ground_truth": "The PSO shall prepare a distinct Board-approved Cyber Crisis Management Plan (CCMP) to detect, contain, respond, and recover from cyber threats.",
+    "expected_circular": "RBI Cyber Resilience and Payment Security Directions",
+    "expected_clause": "9. Cyber Crisis Management Plan",
+    "category": "CYBER_RESILIENCE"
+  },
+  {
+    "question_id": "Q07",
+    "tier": "Tier A",
+    "question": "What is the maximum aggregate limit on outstanding digital credit for accounts opened using Aadhaar OTP based e-KYC in non-face-to-face mode before full KYC?",
+    "ground_truth": "Aggregate balance of all deposit accounts shall not exceed one lakh rupees and aggregate credit limit shall not exceed two lakh rupees in a financial year unless full CDD is completed within one year.",
+    "expected_circular": "RBI Master Direction on KYC",
+    "expected_clause": "17. Accounts opened using Aadhaar OTP based e-KYC",
+    "category": "KYC"
+  },
+  {
+    "question_id": "Q08",
+    "tier": "Tier A",
+    "question": "Are Regulated Entities allowed to store borrower biometric data collected during digital lending?",
+    "ground_truth": "REs shall ensure that DLAs and LSPs do not store biometric data of borrowers under any circumstances.",
+    "expected_circular": "RBI Guidelines on Digital Lending",
+    "expected_clause": "10. Collection, usage and sharing of data",
+    "category": "DIGITAL_LENDING"
+  },
+  {
+    "question_id": "Q09",
+    "tier": "Tier A",
+    "question": "Is multi-factor authentication (MFA) mandatory for all digital payment transactions?",
+    "ground_truth": "The PSO shall ensure multi-factor authentication (MFA) is implemented for all digital payment transactions, with at least one factor being dynamic/non-replicable.",
+    "expected_circular": "RBI Cyber Resilience and Payment Security Directions",
+    "expected_clause": "15. Multi-factor Authentication",
+    "category": "CYBER_RESILIENCE"
+  },
+  {
+    "question_id": "Q010",
+    "tier": "Tier A",
+    "question": "Can prepayment penalties be charged if a borrower exits a digital loan during the cooling-off period?",
+    "ground_truth": "A borrower shall be given an explicit option to exit digital loan by paying the principal and the proportionate APR without any penalty during the cooling-off period.",
+    "expected_circular": "RBI Guidelines on Digital Lending",
+    "expected_clause": "8. Cooling off/look-up period",
+    "category": "DIGITAL_LENDING"
+  },
+  {
+    "question_id": "Q11",
+    "tier": "Tier B",
+    "question": "What is the exact periodic KYC updation schedule for High Risk, Medium Risk, and Low Risk customers under RBI KYC Direction Clause 38?",
+    "ground_truth": "Periodic updation shall be carried out at least once in every 2 years for high risk customers, once in every 8 years for medium risk customers, and once in every 10 years for low risk customers.",
+    "expected_circular": "RBI Master Direction on KYC",
+    "expected_clause": "38. Updation / Periodic Updation of KYC",
+    "category": "KYC"
+  },
+  {
+    "question_id": "Q12",
+    "tier": "Tier B",
+    "question": "What are the mandatory technical specifications for V-CIP infrastructure regarding video encryption and cloud storage?",
+    "ground_truth": "The RE shall ensure end-to-end encryption of data between customer device and hosting point of V-CIP application; the connection must originate from the RE's own domain and no data shall be retained by third-party technology providers or cloud service providers.",
+    "expected_circular": "RBI Master Direction on KYC",
+    "expected_clause": "18. V-CIP Infrastructure",
+    "category": "KYC"
+  },
+  {
+    "question_id": "Q13",
+    "tier": "Tier B",
+    "question": "What disclosures must be included in the standardized Key Fact Statement (KFS) provided to digital lending borrowers?",
+    "ground_truth": "KFS must disclose loan amount, total sum payable, all-inclusive APR breakdown including fees and charges, cooling-off period, and details of grievance redressal officer.",
+    "expected_circular": "RBI Guidelines on Digital Lending",
+    "expected_clause": "5.2. Key Fact Statement",
+    "category": "DIGITAL_LENDING"
+  },
+  {
+    "question_id": "Q14",
+    "tier": "Tier B",
+    "question": "What mobile phone permissions are explicitly prohibited from being accessed by Digital Lending Apps (DLAs)?",
+    "ground_truth": "DLAs shall not access mobile phone resources such as file and media, contact lists, call logs, and telephony functions, though one-time camera, microphone, and location access can be taken with explicit purpose-specific consent for onboarding.",
+    "expected_circular": "RBI Guidelines on Digital Lending",
+    "expected_clause": "10. Collection, usage and sharing of data",
+    "category": "DIGITAL_LENDING"
+  },
+  {
+    "question_id": "Q15",
+    "tier": "Tier B",
+    "question": "What are the liveness check and geo-tagging requirements during Video-based Customer Identification Process (V-CIP)?",
+    "ground_truth": "V-CIP must incorporate live audio-visual interaction, liveliness check using facial recognition technology, and geo-tagging to ensure the customer is physically present within India during onboarding.",
+    "expected_circular": "RBI Master Direction on KYC",
+    "expected_clause": "18. V-CIP Procedure",
+    "category": "KYC"
+  },
+  {
+    "question_id": "Q16",
+    "tier": "Tier B",
+    "question": "What is the incident classification matrix and escalation requirement for cybersecurity events under payment security directions?",
+    "ground_truth": "The PSO must categorize incidents by severity (critical, high, medium, low) and escalate critical cyber disruptions immediately to the CISO, senior management, CERT-In and RBI within 6 hours.",
+    "expected_circular": "RBI Cyber Resilience and Payment Security Directions",
+    "expected_clause": "22. Incident Response",
+    "category": "CYBER_RESILIENCE"
+  },
+  {
+    "question_id": "Q17",
+    "tier": "Tier B",
+    "question": "What Officially Valid Documents (OVDs) can be accepted for proof of identity and proof of address under Simplified KYC?",
+    "ground_truth": "Passport, driving licence, proof of possession of Aadhaar number, Voter Identity Card, NREGA job card signed by an officer of the State Government, and letter issued by the National Population Register.",
+    "expected_circular": "RBI Master Direction on KYC",
+    "expected_clause": "3. Definitions",
+    "category": "KYC"
+  },
+  {
+    "question_id": "Q18",
+    "tier": "Tier B",
+    "question": "What are the contractual and audit standards required when a Payment System Operator engages third-party technology service providers?",
+    "ground_truth": "The PSO must mandate that service providers adhere to RBI cyber resilience directions, submit to regular vulnerability assessments and independent security audits, and guarantee right to audit by RBI.",
+    "expected_circular": "RBI Cyber Resilience and Payment Security Directions",
+    "expected_clause": "25. Vendor Risk Management",
+    "category": "CYBER_RESILIENCE"
+  },
+  {
+    "question_id": "Q19",
+    "tier": "Tier C",
+    "question": "Can loan apps read my phone contacts or photo gallery to determine my credit score?",
+    "ground_truth": "No. RBI Digital Lending Guidelines strictly prohibit DLAs from accessing mobile phone resources such as contacts, media, gallery, or call logs for credit assessment or any other purpose.",
+    "expected_circular": "RBI Guidelines on Digital Lending",
+    "expected_clause": "10. Collection, usage and sharing of data",
+    "category": "DIGITAL_LENDING"
+  },
+  {
+    "question_id": "Q20",
+    "tier": "Tier C",
+    "question": "What are the rules regarding LSP recovery agents calling borrowers at odd hours or harassing family members?",
+    "ground_truth": "REs and their LSPs must adhere to fair practices code; recovery agents are strictly prohibited from intimidating, harassing, or contacting borrowers before 8:00 AM or after 7:00 PM, or harassing relatives.",
+    "expected_circular": "RBI Guidelines on Digital Lending",
+    "expected_clause": "7. Recovery Agents and Fair Practices",
+    "category": "DIGITAL_LENDING"
+  },
+  {
+    "question_id": "Q21",
+    "tier": "Tier C",
+    "question": "How often does a bank have to refresh KYC for a dormant low-risk savings account?",
+    "ground_truth": "For low-risk customers, periodic KYC updation is required at least once in every 10 years, and no fresh KYC is required solely due to change of address if self-declaration is submitted.",
+    "expected_circular": "RBI Master Direction on KYC",
+    "expected_clause": "38. Updation / Periodic Updation of KYC",
+    "category": "KYC"
+  },
+  {
+    "question_id": "Q22",
+    "tier": "Tier C",
+    "question": "If my DLA charges processing fees, can those fees be deducted by the recovery partner directly?",
+    "ground_truth": "No. Any fee or charge payable to LSPs must be paid directly by the Regulated Entity (RE) and cannot be charged to the borrower by the LSP directly.",
+    "expected_circular": "RBI Guidelines on Digital Lending",
+    "expected_clause": "5. Disclosures to borrowers",
+    "category": "DIGITAL_LENDING"
+  },
+  {
+    "question_id": "Q23",
+    "tier": "Tier C",
+    "question": "Does remote facial KYC work if the customer is traveling outside India during the video call?",
+    "ground_truth": "No. During V-CIP, geo-tagging must be verified to ensure that the customer is physically present inside the geographical boundaries of India at the time of onboarding.",
+    "expected_circular": "RBI Master Direction on KYC",
+    "expected_clause": "18. V-CIP Procedure",
+    "category": "KYC"
+  },
+  {
+    "question_id": "Q24",
+    "tier": "Tier C",
+    "question": "What happens if a digital lending fintech platform experiences a data breach involving borrower payment credentials?",
+    "ground_truth": "The incident must be categorized as a critical security event and reported to the Reserve Bank of India and CERT-In within 6 hours of discovery, followed by root cause analysis.",
+    "expected_circular": "RBI Cyber Resilience and Payment Security Directions",
+    "expected_clause": "22. Incident Response",
+    "category": "CYBER_RESILIENCE"
+  },
+  {
+    "question_id": "Q25",
+    "tier": "Tier C",
+    "question": "What is the look-up period rule if a borrower takes a short-term 5-day instant digital loan?",
+    "ground_truth": "For digital loans having a tenor of less than seven days, the statutory cooling-off/look-up period determined by the Board of the RE must be at least one day without penalty.",
+    "expected_circular": "RBI Guidelines on Digital Lending",
+    "expected_clause": "8. Cooling off/look-up period",
+    "category": "DIGITAL_LENDING"
+  }
+]

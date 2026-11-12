@@ -1,0 +1,26 @@
+question_id,tier,question,baseline_precision,agentic_precision,baseline_recall,agentic_recall,baseline_faithfulness,agentic_faithfulness
+Q01,Tier A,Within how many hours must an authorized Payment System Operator report a cyber security incident to CERT-In and RBI?,0.75,0.75,0.8571,0.9286,0.8571,0.7742
+Q02,Tier A,What is the minimum cooling-off period for digital loans having a tenor of seven days or more under Digital Lending Directions?,1.0,1.0,0.9545,0.9545,0.8611,0.9367
+Q03,Tier A,Whose approval is mandatory before onboarding a Politically Exposed Person (PEP) as a customer?,0.75,0.75,0.7692,0.8462,0.8438,0.7586
+Q04,Tier A,What is the definition of Annual Percentage Rate (APR) under Digital Lending Guidelines?,1.0,1.0,0.75,0.8125,0.8571,0.8214
+Q05,Tier A,Can digital lending loan disbursals be routed through a third-party pool account of a Lending Service Provider (LSP)?,1.0,1.0,0.6087,0.9565,0.8438,0.9457
+Q06,Tier A,Who must approve the Cyber Crisis Management Plan (CCMP) of a Payment System Operator?,0.75,1.0,0.8,0.8,0.8485,0.8448
+Q07,Tier A,What is the maximum aggregate limit on outstanding digital credit for accounts opened using Aadhaar OTP based e-KYC in non-face-to-face mode before full KYC?,0.5,1.0,0.7143,1.0,0.8611,0.6774
+Q08,Tier A,Are Regulated Entities allowed to store borrower biometric data collected during digital lending?,1.0,1.0,0.8462,0.9231,0.8571,0.8333
+Q09,Tier A,Is multi-factor authentication (MFA) mandatory for all digital payment transactions?,1.0,1.0,0.6875,0.8125,0.875,0.6
+Q010,Tier A,Can prepayment penalties be charged if a borrower exits a digital loan during the cooling-off period?,1.0,1.0,0.9474,1.0,0.8611,0.9375
+Q11,Tier B,"What is the exact periodic KYC updation schedule for High Risk, Medium Risk, and Low Risk customers under RBI KYC Direction Clause 38?",0.25,0.5,0.8421,0.8947,0.8611,0.7143
+Q12,Tier B,What are the mandatory technical specifications for V-CIP infrastructure regarding video encryption and cloud storage?,1.0,1.0,0.8333,0.8333,0.8333,0.7037
+Q13,Tier B,What disclosures must be included in the standardized Key Fact Statement (KFS) provided to digital lending borrowers?,0.75,1.0,0.3,0.75,0.8387,0.8333
+Q14,Tier B,What mobile phone permissions are explicitly prohibited from being accessed by Digital Lending Apps (DLAs)?,0.0,0.5,0.1071,0.8571,0.8333,0.7
+Q15,Tier B,What are the liveness check and geo-tagging requirements during Video-based Customer Identification Process (V-CIP)?,1.0,1.0,0.4286,0.7143,0.8148,0.7619
+Q16,Tier B,What is the incident classification matrix and escalation requirement for cybersecurity events under payment security directions?,0.25,0.0,0.3913,0.3043,0.8485,0.6923
+Q17,Tier B,What Officially Valid Documents (OVDs) can be accepted for proof of identity and proof of address under Simplified KYC?,0.25,0.0,0.8696,0.3913,0.8611,0.7586
+Q18,Tier B,What are the contractual and audit standards required when a Payment System Operator engages third-party technology service providers?,1.0,1.0,0.4348,0.3913,0.8438,0.8649
+Q19,Tier C,Can loan apps read my phone contacts or photo gallery to determine my credit score?,0.75,0.75,0.4231,0.6923,0.8077,0.7
+Q20,Tier C,What are the rules regarding LSP recovery agents calling borrowers at odd hours or harassing family members?,1.0,1.0,0.3333,0.4815,0.8276,0.6452
+Q21,Tier C,How often does a bank have to refresh KYC for a dormant low-risk savings account?,1.0,0.75,0.5714,0.7619,0.8529,0.6429
+Q22,Tier C,"If my DLA charges processing fees, can those fees be deducted by the recovery partner directly?",1.0,1.0,0.7,0.95,0.8571,0.8276
+Q23,Tier C,Does remote facial KYC work if the customer is traveling outside India during the video call?,1.0,1.0,0.3684,0.6316,0.8611,0.6786
+Q24,Tier C,What happens if a digital lending fintech platform experiences a data breach involving borrower payment credentials?,0.25,0.25,0.3636,0.5,0.8684,0.75
+Q25,Tier C,What is the look-up period rule if a borrower takes a short-term 5-day instant digital loan?,1.0,1.0,0.7391,0.7391,0.8611,0.9125

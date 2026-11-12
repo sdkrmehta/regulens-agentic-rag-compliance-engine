@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+ENV/
+
+# Model & Storage Caches
+.model_cache/
+qdrant_storage/
+.pytest_cache/
+
+# Environment Variables & Secrets
+.env
+!.env.example
+
+# OS specific
+.DS_Store
+Thumbs.db
+
+# Output artifacts
+*.log

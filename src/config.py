@@ -17,10 +17,16 @@ class Settings(BaseSettings):
     SYNTHESIS_LLM_MODEL: str = "llama-3.3-70b-versatile"
 
     # Qdrant Vector DB Settings
+    QDRANT_HOST: Optional[str] = None
+    QDRANT_PORT: int = 6333
     QDRANT_URL: str = "http://localhost:6333"
     QDRANT_API_KEY: Optional[SecretStr] = None
     QDRANT_COLLECTION: str = "rbi_compliance_hybrid"
     CACHE_COLLECTION: str = "query_semantic_cache"
+
+    def model_post_init(self, __context):
+        if self.QDRANT_HOST and not os.getenv("QDRANT_URL"):
+            self.QDRANT_URL = f"http://{self.QDRANT_HOST}:{self.QDRANT_PORT}"
 
     # Embedding and Reranking Models
     DENSE_EMBED_MODEL: str = "BAAI/bge-small-en-v1.5"

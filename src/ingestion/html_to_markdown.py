@@ -4,9 +4,8 @@ import re
 from pathlib import Path
 from bs4 import BeautifulSoup, Tag
 
-
 CLAUSE_HEADER_RE = re.compile(
-    r"^(?:(?:Section|Para(?:graph)?|Clause|Chapter|Annex(?:ure)?|Schedule)\s*[\dIVX]+(?:\.[\d]+)*(?:\s*\([a-zA-Z0-9]+\))*|\d+\.\s+[A-Z]|\d+\.\d+\s+[A-Z])",
+    r"^(?:(?:Section|Para(?:graph)?|Clause|Chapter|Annex(?:ure)?|Schedule)\s*[\dIVX]+(?:\.[\d]+)*(?:\s*\([a-zA-Z0-9]+\))*|\d+\.\s+[A-Za-z]|\d+\.\d+\s+[A-Za-z]|\([a-z]\)\s+[A-Za-z])",
     re.IGNORECASE,
 )
 
@@ -54,6 +53,10 @@ def convert_rbi_html_to_markdown(html_path: Path, doc_category: str) -> str:
     if not container:
         container = soup.find("div", id="accordion") or soup.body
 
+    # Remove superscript footnotes so numbering like "18. 62REs" becomes clean "18. REs"
+    for sup in container.find_all("sup"):
+        sup.decompose()
+
     blocks = []
     chars_per_page = 2200
     current_char_count = 0
@@ -61,7 +64,6 @@ def convert_rbi_html_to_markdown(html_path: Path, doc_category: str) -> str:
 
     blocks.append(f"<!-- PAGE_NUMBER: {current_page} -->\n")
 
-    # Iterate through child paragraphs and tables
     for el in container.find_all(["h1", "h2", "h3", "h4", "p", "table"]):
         if el.name in ["h1", "h2", "h3", "h4"]:
             text = el.get_text(strip=True)
@@ -72,7 +74,6 @@ def convert_rbi_html_to_markdown(html_path: Path, doc_category: str) -> str:
                 blocks.append(block)
                 current_char_count += len(block)
         elif el.name == "table" and el.get("class") != ["tablebg"]:
-            # If not nested
             if not el.find("table"):
                 tbl_md = table_to_markdown(el)
                 if tbl_md.strip():
@@ -83,8 +84,12 @@ def convert_rbi_html_to_markdown(html_path: Path, doc_category: str) -> str:
                 continue
             text = el.get_text(separator=" ", strip=True)
             if text and len(text) > 5:
-                # If matches statutory clause header
-                if CLAUSE_HEADER_RE.match(text):
+                # If matches statutory clause header or is a designated heading class
+                is_clause_header = bool(CLAUSE_HEADER_RE.match(text))
+                if not is_clause_header and el.get("class") and "head" in el.get("class"):
+                    is_clause_header = True
+
+                if is_clause_header:
                     block = f"\n\n### {text}\n\n"
                 else:
                     block = f"\n\n{text}\n\n"

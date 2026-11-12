@@ -8,7 +8,7 @@ The Chairman / Managing Director / Chief Executive Officer Authorised Non-bank P
 
 Madam / Dear Sir,
 
-Master Directions on Cyber Resilience and Digital Payment Security Controls for non-bank Payment System Operators
+### Master Directions on Cyber Resilience and Digital Payment Security Controls for non-bank Payment System Operators
 
 The safety and security of payment systems is a key objective of the Reserve Bank of India (RBI). To ensure that the authorised non-bank Payment System Operators (PSOs) are resilient to existing and emerging information systems and cyber security risks, it was announced in the Statement on Developmental and Regulatory Policies issued as part of Monetary Policy Statement dated April 08, 2022 that RBI will issue directions on Cyber Resilience and Payment Security Controls for Payment System Operators (PSOs).
 
@@ -20,29 +20,29 @@ Yours faithfully,
 
 (Sudhanshu Prasad) Chief General Manager
 
-Master Directions on Cyber Resilience and Digital Payment Security Controls for non-bank Payment System Operators (PSOs)
+### Master Directions on Cyber Resilience and Digital Payment Security Controls for non-bank Payment System Operators (PSOs)
 
 ### Section I Preliminary
 
-Introduction
+### Introduction
 
 ### 1. In exercise of the powers conferred under Section 10 (2) read with Section 18 of the Payment and Settlement Systems Act, 2007 (PSS Act), the Reserve Bank of India (RBI, Bank) being satisfied that it is necessary and expedient in the public interest so to do, issues the Master Directions hereinafter specified.
 
 <!-- PAGE_NUMBER: 2 -->
 
-Short Title and Commencement
+### Short Title and Commencement
 
 ### 2. These Master Directions shall be called the Reserve Bank of India (Cyber Resilience and Digital Payment Security Controls for non-bank PSOs) Master Directions, 2024 (Master Directions, Directions).
 
-### 3. The Directions shall come into effect on the day they are placed on the official website of the RBI. In order to provide adequate time to put in place the necessary compliance structure, a phased implementation approach 1 is prescribed as under –
+### 3. The Directions shall come into effect on the day they are placed on the official website of the RBI. In order to provide adequate time to put in place the necessary compliance structure, a phased implementation approach is prescribed as under –
 
-Applicability
+### Applicability
 
 ### 4. The provisions of these Directions shall apply to all authorised non-bank PSOs.
 
 ### 5. To effectively identify, monitor, control and manage cyber and technology related risks arising out of linkages of PSOs with unregulated entities who are part of their digital payments ecosystem (like payment gateways, third party service providers, vendors, etc.), PSOs shall ensure adherence to these Directions by such unregulated entities as well, subject to mutual agreement. An organisational policy in this respect, approved by the Board, shall be put in place.
 
-Purpose
+### Purpose
 
 ### 6. These Directions aim to improve safety and security of the payment systems operated by PSOs by providing a framework for overall information security preparedness with an emphasis on cyber resilience.
 
@@ -54,11 +54,11 @@ Purpose
 
 <!-- PAGE_NUMBER: 3 -->
 
-Cyber Security Preparedness
+### Cyber Security Preparedness
 
 ### 9. The PSO shall prepare a distinct Board approved Cyber Crisis Management Plan (CCMP) to detect, contain, respond and recover from cyber threats and cyber attacks. Relevant guidelines from CERT-In / National Critical Information Infrastructure Protection Centre (NCIIPC) / IDRBT and other agencies may be referred for guidance.
 
-Risk Assessment and Monitoring
+### Risk Assessment and Monitoring
 
 ### 10. The Board shall entrust the responsibility and accountability for implementing the IS policy and the cyber resilience framework as well as for continuously assessing the overall IS posture of PSO to a senior level executive with expertise in areas of information security including cyber security. [e.g. Chief Information Security Officer (CISO)].
 
@@ -88,9 +88,9 @@ All individuals having access to the IT environment of the PSO shall be assigned
 
 Default authentication settings in systems / software / services shall be deactivated and changed before they are rolled out to live environment.
 
-Access to systems and different environments (development, test, production, etc.) shall be based on need-to-have, need-to-know and based on the principle of least privilege 5 .
+Access to systems and different environments (development, test, production, etc.) shall be based on need-to-have, need-to-know and based on the principle of least privilege .
 
-The use of privileged accounts 6 shall be with multi-factor authentication and tightly monitored. Appropriate controls, including rotation policy, shall be implemented.
+The use of privileged accounts shall be with multi-factor authentication and tightly monitored. Appropriate controls, including rotation policy, shall be implemented.
 
 Necessary security controls, including centralised mechanism to whitelist / blacklist, shall be put in place to ensure secure use of removable media and portable devices (eg. smartphones, laptops, etc.).
 
@@ -148,7 +148,7 @@ The PSO shall put in place necessary security controls for preventing infiltrati
 
 The PSO shall adhere to the relevant legal and regulatory requirements relating to geographical location of infrastructure and processing, storage and usage of data and also ensure compliance by their vendors.
 
-In case of vendors involved in critical processes and activities 7 , the PSO shall obtain certified assurance from an independent auditor on the vendor’s cyber resilience capabilities.
+In case of vendors involved in critical processes and activities , the PSO shall obtain certified assurance from an independent auditor on the vendor’s cyber resilience capabilities.
 
 ### 20. Data Security
 
@@ -202,7 +202,7 @@ DR drills shall be conducted on a half-yearly or more frequent basis. Any diverg
 
 ### 24. Application Programming Interfaces (APIs)
 
-(a) To safeguard applications against risks emanating from insecure APIs, the PSO shall put in place, inter-alia, the following measures:
+### (a) To safeguard applications against risks emanating from insecure APIs, the PSO shall put in place, inter-alia, the following measures:
 
 Authentication and Authorisation – Establish identity of the communicating applications;
 
@@ -210,9 +210,9 @@ Confidentiality – Ensure that the message content is not tampered with;
 
 Integrity – Resources are reliably transferred; and
 
-Availability and Threat Protection – APIs are available when needed; anomalous 8 activities identified and mitigative action taken.
+Availability and Threat Protection – APIs are available when needed; anomalous activities identified and mitigative action taken.
 
-(b) The PSO shall adhere to relevant standards and globally recognised frameworks on API security.
+### (b) The PSO shall adhere to relevant standards and globally recognised frameworks on API security.
 
 ### 25. Employee Awareness / Training
 
@@ -220,9 +220,9 @@ The PSO shall ensure periodic repeated training / awareness programs on informat
 
 A system of periodic evaluation of cyber security awareness amongst employees shall be operationalised. Employees with an awareness level below a benchmark score may be restricted / prohibited from accessing information assets.
 
-Board members and key senior management personnel shall be provided training and sensitised on information security and cyber risks.
-
 <!-- PAGE_NUMBER: 9 -->
+
+Board members and key senior management personnel shall be provided training and sensitised on information security and cyber risks.
 
 ### 26. Cloud Security
 
@@ -272,7 +272,7 @@ In cases where the OTP is a factor of authentication, the PSO shall ensure that 
 
 ### 30. The PSO shall provide a facility on its mobile application / website that would enable customers, with necessary authentication, to identify / mark a fraudulent transaction for seamless and immediate notification to the issuer of payment instrument. It shall also ensure facilitation of such mechanism by the system participants.
 
-Mobile Payments
+### Mobile Payments
 
 ### 31. The PSO providing / facilitating / processing mobile payment services transactions shall comply with the following security practices and risk mitigation measures and shall also ensure that the participants in its payment system comply with these instructions:
 
@@ -280,7 +280,7 @@ PSO shall put in place a mechanism to ensure that the mobile application is free
 
 The PSO shall ensure that an authenticated session, together with its encryption protocol, remains intact throughout an interaction with the customer. In case of any interference or if the customer closes the application, the session shall be terminated, and the affected transactions resolved or reversed out.
 
-The PSO shall ensure device binding 9 / finger printing of mobile applications with the device and SIM. In case the mobile application remains unused beyond a policy determined specified period, the PSO shall ensure device binding is performed again.
+The PSO shall ensure device binding / finger printing of mobile applications with the device and SIM. In case the mobile application remains unused beyond a policy determined specified period, the PSO shall ensure device binding is performed again.
 
 The PSO shall ensure that an online session on mobile application is automatically terminated after a fixed period of inactivity and customers are prompted to re-login.
 
@@ -292,39 +292,39 @@ Whenever there is a change in registered mobile number or email ID linked to the
 
 <!-- PAGE_NUMBER: 12 -->
 
-Card Payments
+### Card Payments
 
 ### 32. The PSO shall ensure that terminals installed at merchants for capturing card details for payments or otherwise are validated against the PCI-P2PE program; PoS terminals with PIN entry installed at the merchants for capturing card payments (including the double swipe terminals) shall be approved by the PCI-PTS program.
 
 ### 33. The card networks shall facilitate implementation of transaction limits at card, Bank Identification Number (BIN) as well as at card issuer level. Such limits shall mandatorily be set at the card network switch itself. The card networks shall institute an alert mechanism on a 24x7x365 basis, to be triggered to the card issuer in case of any suspicious incident. Card networks shall ensure that card details of the customers are stored in an encrypted form at any of their server locations. They shall also ensure that processing of the card details in readable format is performed in a secure manner.
 
-Prepaid Payment Instruments
+### Prepaid Payment Instruments
 
 ### 34. PPI issuers are encouraged to communicate OTP and transaction alerts with users in a language of their choice, including vernacular languages.
 
 ### 35. The PPI issuers – banks and non-banks – shall put in place suitable cooling period for funds transfer and cash withdrawal after such funds are electronically loaded on to the PPI.
 
-Acronyms
+### Acronyms
 
-1 The timelines prescribed in the instructions issued earlier by RBI shall continue to be applicable as hitherto.
+The timelines prescribed in the instructions issued earlier by RBI shall continue to be applicable as hitherto.
 
-2 For the purpose of these Directions, Clearing Corporation of India Limited (CCIL), National Payments Corporation of India (NPCI), NPCI Bharat Bill Pay Limited, Card Payment Networks, Non-bank ATM Networks, White Label ATM Operators (WLAOs), Large PPI Issuers, Trade Receivables Discounting System (TReDS) Operators, Bharat Bill Payment Operating Units (BBPOUs) and Payment Aggregators (PAs) are considered as large non-bank PSOs.
+For the purpose of these Directions, Clearing Corporation of India Limited (CCIL), National Payments Corporation of India (NPCI), NPCI Bharat Bill Pay Limited, Card Payment Networks, Non-bank ATM Networks, White Label ATM Operators (WLAOs), Large PPI Issuers, Trade Receivables Discounting System (TReDS) Operators, Bharat Bill Payment Operating Units (BBPOUs) and Payment Aggregators (PAs) are considered as large non-bank PSOs.
 
-3 Cross-border (in-bound) Money Transfer Operators under Money Transfer Service Scheme (MTSS) and Medium PPI Issuers are considered as medium non-bank PSOs.
+Cross-border (in-bound) Money Transfer Operators under Money Transfer Service Scheme (MTSS) and Medium PPI Issuers are considered as medium non-bank PSOs.
 
-4 Small PPI Issuers and Instant Money Transfer Operators are considered as small non-bank PSOs.
+Small PPI Issuers and Instant Money Transfer Operators are considered as small non-bank PSOs.
 
 Categorisation of authorised non-bank PPI Issuers into small, medium and large is as per the Oversight Framework for Financial Market Infrastructures (FMIs) and Retail Payment Systems (RPSs) . If a PPI Issuer moves to a higher category, the timeline of the category to which it moves into, would apply. For instance, if a small (or medium) PPI issuer moves into medium category (or large), it will need to comply with these Directions within a period of two (or one) years from the time of new categorisation, as the case may be.
 
 <!-- PAGE_NUMBER: 13 -->
 
-5 Principle of least privilege refers to granting a user or a process only those privileges or access to the specific data, resources and applications that are/is necessary for intended function or to complete a required task.
+Principle of least privilege refers to granting a user or a process only those privileges or access to the specific data, resources and applications that are/is necessary for intended function or to complete a required task.
 
-6 Privileged accounts refer to a user account that has more privileges than ordinary user e.g. Administrator level accounts. Such user may be able to install or remove software, upgrade the operating system, or modify system or application configurations. They might also have access to files that are not normally accessible to standard users.
+Privileged accounts refer to a user account that has more privileges than ordinary user e.g. Administrator level accounts. Such user may be able to install or remove software, upgrade the operating system, or modify system or application configurations. They might also have access to files that are not normally accessible to standard users.
 
-7 Critical processes as defined in the Framework for Outsourcing of Payment and Settlement-related Activities by PSOs issued by RBI vide circular dated August 03, 2021 (updated from time to time).
+Critical processes as defined in the Framework for Outsourcing of Payment and Settlement-related Activities by PSOs issued by RBI vide circular dated August 03, 2021 (updated from time to time).
 
-8 Activity that is sufficiently different than historical activity.
+Activity that is sufficiently different than historical activity.
 
-9 The device binding shall be preferably implemented through a combination of hardware, software and service information.
+The device binding shall be preferably implemented through a combination of hardware, software and service information.
 

@@ -1,0 +1,190 @@
+{
+  "summary": {
+    "Cold Single-Pass": {
+      "count": 10,
+      "p50_latency_s": 0.0111,
+      "p95_latency_s": 1.3417,
+      "p50_latency_ms": 11.07,
+      "p95_latency_ms": 1341.7,
+      "avg_tokens": 525.0
+    },
+    "Self-Correction Rewrite": {
+      "count": 5,
+      "p50_latency_s": 0.9139,
+      "p95_latency_s": 1.5473,
+      "p50_latency_ms": 913.88,
+      "p95_latency_ms": 1547.27,
+      "avg_tokens": 1276.2
+    },
+    "Warm Semantic Cache": {
+      "count": 5,
+      "p50_latency_s": 0.0108,
+      "p95_latency_s": 0.0114,
+      "p50_latency_ms": 10.82,
+      "p95_latency_ms": 11.37,
+      "avg_tokens": 0.0
+    }
+  },
+  "raw_runs": [
+    {
+      "profile": "Cold Single-Pass",
+      "query": "What is the minimum cooling-off period prescribed by RBI for digital loans having a tenor of seven days or more?",
+      "latency_s": 1.2607307434082031,
+      "cache_hit": false,
+      "retry_count": 0,
+      "tokens_burned": 1415
+    },
+    {
+      "profile": "Cold Single-Pass",
+      "query": "What are the core technical security requirements for V-CIP live video credentials?",
+      "latency_s": 0.010431528091430664,
+      "cache_hit": true,
+      "retry_count": 0,
+      "tokens_burned": 0
+    },
+    {
+      "profile": "Cold Single-Pass",
+      "query": "What is the mandatory timeline for reporting a cyber incident to CERT-In and RBI?",
+      "latency_s": 0.0070416927337646484,
+      "cache_hit": true,
+      "retry_count": 0,
+      "tokens_burned": 0
+    },
+    {
+      "profile": "Cold Single-Pass",
+      "query": "What is the periodic KYC update interval for High-Risk customers versus Low-Risk customers?",
+      "latency_s": 1.2581868171691895,
+      "cache_hit": false,
+      "retry_count": 0,
+      "tokens_burned": 1290
+    },
+    {
+      "profile": "Cold Single-Pass",
+      "query": "Are Lending Service Providers permitted to directly store customer biometrics?",
+      "latency_s": 0.6928267478942871,
+      "cache_hit": false,
+      "retry_count": 0,
+      "tokens_burned": 1271
+    },
+    {
+      "profile": "Cold Single-Pass",
+      "query": "Under what circumstances can a borrower exit a digital loan without paying a prepayment penalty?",
+      "latency_s": 0.010879039764404297,
+      "cache_hit": true,
+      "retry_count": 0,
+      "tokens_burned": 0
+    },
+    {
+      "profile": "Cold Single-Pass",
+      "query": "What information must be prominently disclosed in the Key Fact Statement for digital loans?",
+      "latency_s": 0.008893013000488281,
+      "cache_hit": true,
+      "retry_count": 0,
+      "tokens_burned": 0
+    },
+    {
+      "profile": "Cold Single-Pass",
+      "query": "What are the rules regarding loan disbursals directly to borrower bank accounts?",
+      "latency_s": 0.011260032653808594,
+      "cache_hit": true,
+      "retry_count": 0,
+      "tokens_burned": 0
+    },
+    {
+      "profile": "Cold Single-Pass",
+      "query": "How often must Regulated Entities conduct cyber vulnerability assessments and penetration testing?",
+      "latency_s": 0.009086847305297852,
+      "cache_hit": true,
+      "retry_count": 0,
+      "tokens_burned": 0
+    },
+    {
+      "profile": "Cold Single-Pass",
+      "query": "What is the definition of Officially Valid Document for individual KYC identification?",
+      "latency_s": 1.4079442024230957,
+      "cache_hit": false,
+      "retry_count": 0,
+      "tokens_burned": 1274
+    },
+    {
+      "profile": "Self-Correction Rewrite",
+      "query": "Can DLAs look at phone contacts and gallery for credit scoring?",
+      "latency_s": 0.7700984477996826,
+      "cache_hit": false,
+      "retry_count": 0,
+      "tokens_burned": 1279
+    },
+    {
+      "profile": "Self-Correction Rewrite",
+      "query": "What is the KFS cooling off rule when a borrower cancels loan?",
+      "latency_s": 0.7565245628356934,
+      "cache_hit": false,
+      "retry_count": 0,
+      "tokens_burned": 1268
+    },
+    {
+      "profile": "Self-Correction Rewrite",
+      "query": "Rules on V-CIP geo-tagging and liveness check for bank accounts",
+      "latency_s": 0.9138751029968262,
+      "cache_hit": false,
+      "retry_count": 0,
+      "tokens_burned": 1293
+    },
+    {
+      "profile": "Self-Correction Rewrite",
+      "query": "Incident reporting cutoff to CERT-In under cyber direction",
+      "latency_s": 1.61979079246521,
+      "cache_hit": false,
+      "retry_count": 0,
+      "tokens_burned": 1273
+    },
+    {
+      "profile": "Self-Correction Rewrite",
+      "query": "Periodic KYC refresh timeline for risk categories",
+      "latency_s": 1.257181167602539,
+      "cache_hit": false,
+      "retry_count": 0,
+      "tokens_burned": 1268
+    },
+    {
+      "profile": "Warm Semantic Cache",
+      "query": "What is the minimum cooling-off period prescribed by RBI for digital loans having a tenor of seven days or more?",
+      "latency_s": 0.010822296142578125,
+      "cache_hit": true,
+      "retry_count": 0,
+      "tokens_burned": 0
+    },
+    {
+      "profile": "Warm Semantic Cache",
+      "query": "What are the core technical security requirements for V-CIP live video credentials?",
+      "latency_s": 0.01122903823852539,
+      "cache_hit": true,
+      "retry_count": 0,
+      "tokens_burned": 0
+    },
+    {
+      "profile": "Warm Semantic Cache",
+      "query": "What is the mandatory timeline for reporting a cyber incident to CERT-In and RBI?",
+      "latency_s": 0.010464906692504883,
+      "cache_hit": true,
+      "retry_count": 0,
+      "tokens_burned": 0
+    },
+    {
+      "profile": "Warm Semantic Cache",
+      "query": "What is the periodic KYC update interval for High-Risk customers versus Low-Risk customers?",
+      "latency_s": 0.011399984359741211,
+      "cache_hit": true,
+      "retry_count": 0,
+      "tokens_burned": 0
+    },
+    {
+      "profile": "Warm Semantic Cache",
+      "query": "Are Lending Service Providers permitted to directly store customer biometrics?",
+      "latency_s": 0.008742094039916992,
+      "cache_hit": true,
+      "retry_count": 0,
+      "tokens_burned": 0
+    }
+  ]
+}
