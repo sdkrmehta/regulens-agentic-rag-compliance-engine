@@ -2,7 +2,7 @@
 
 import uuid
 import logging
-from typing import List, Dict, Any, Optional, Set
+from typing import List, Dict, Any, Optional, Set, Tuple
 import numpy as np
 from qdrant_client import QdrantClient, models
 
@@ -11,6 +11,8 @@ from src.schemas import CitedResponse
 from src.retrieval.vector_store import get_dense_model, get_qdrant_client
 
 logger = logging.getLogger(__name__)
+
+_MODULE_QDRANT_DISABLED: bool = False
 
 REGULATORY_KEY_ENTITIES = [
     "high-risk", "medium-risk", "low-risk", "high risk", "low risk", "medium risk",
@@ -44,12 +46,31 @@ class EntityScopedSemanticCache:
         self.dense_model = get_dense_model()
         self.similarity_threshold = similarity_threshold or settings.SEMANTIC_CACHE_THRESHOLD
         self._memory_cache: Dict[str, Dict[str, Any]] = {}
+        self._embed_cache: Dict[str, Tuple[List[float], np.ndarray]] = {}
         self._collection_initialized: bool = False
-        self._qdrant_disabled: bool = False
+        global _MODULE_QDRANT_DISABLED
+        self._qdrant_disabled: bool = _MODULE_QDRANT_DISABLED
         self._hits: int = 0
         self._misses: int = 0
         self._writes: int = 0
         self._rejections: int = 0
+
+    def _get_embedding(self, question: str) -> Tuple[List[float], np.ndarray]:
+        """Sub-millisecond query embedding caching for warm SLA performance."""
+        q_key = question.strip().lower()
+        if q_key in self._embed_cache:
+            return self._embed_cache[q_key]
+
+        vector = list(self.dense_model.embed([question]))[0].tolist()
+        vector_np = np.array(vector, dtype=np.float32)
+        norm_v = np.linalg.norm(vector_np)
+        if norm_v > 0:
+            vector_np = vector_np / norm_v
+
+        if len(self._embed_cache) >= 1000:
+            self._embed_cache.clear()
+        self._embed_cache[q_key] = (vector, vector_np)
+        return vector, vector_np
 
     def init_cache_collection(self, recreate: bool = False):
         """Initialize the semantic cache collection with 384-d cosine vectors."""
@@ -80,6 +101,8 @@ class EntityScopedSemanticCache:
                     )
                 )
         except Exception as e:
+            global _MODULE_QDRANT_DISABLED
+            _MODULE_QDRANT_DISABLED = True
             self._qdrant_disabled = True
             logger.warning(f"Could not connect to Qdrant for semantic cache collection '{self.collection_name}': {e}. Using resilient in-memory cache.")
 
@@ -90,23 +113,34 @@ class EntityScopedSemanticCache:
         extracted_entities: Optional[List[str]] = None,
         category_filter: Optional[str] = None,
         entity_type: Optional[str] = None,
+        effective_date: Optional[str] = None,
+        historical_mode: bool = False,
+        corpus_version: str = "3.0",
     ) -> Optional[Dict[str, Any]]:
         """
-        Dual-Condition Cache Lookup:
+        Multi-Dimensional Isolation Cache Lookup:
         1. Cosine similarity >= threshold on dense query embedding.
         2. Entity Guard: exact match on query_type AND extracted regulatory entity set.
+        3. Regulatory Domain Guard: exact match on category_filter.
+        4. Entity Type Guard: exact match on entity_type.
+        5. Effective Date Guard: exact match on effective_date.
+        6. Historical Mode Guard: exact match on historical_mode.
+        7. Corpus Version Guard: exact match on corpus_version.
         """
         self.init_cache_collection(recreate=False)
-        if not extracted_entities:
-            extracted_entities = extract_regulatory_entities(question)
+        # Derive this dimension identically in API and standalone mode. Router
+        # extraction can vary by model/version and must not create cache aliases.
+        extracted_entities = extract_regulatory_entities(question)
         extracted_set = set(e.strip().lower() for e in extracted_entities)
 
-        # Generate query embedding vector
-        vector = list(self.dense_model.embed([question]))[0].tolist()
-        vector_np = np.array(vector, dtype=np.float32)
-        norm_v = np.linalg.norm(vector_np)
-        if norm_v > 0:
-            vector_np = vector_np / norm_v
+        norm_category = (category_filter or "").strip().upper() or None
+        norm_entity = (entity_type or "").strip().lower() or None
+        norm_date = (effective_date or "").strip() or None
+        norm_hist = bool(historical_mode)
+        norm_corpus = str(corpus_version or "3.0").strip()
+
+        # Generate query embedding vector (sub-millisecond when warmed)
+        vector, vector_np = self._get_embedding(question)
 
         # Try Qdrant search first if not disabled
         if not self._qdrant_disabled:
@@ -114,28 +148,43 @@ class EntityScopedSemanticCache:
                 search_results = self.client.query_points(
                     collection_name=self.collection_name,
                     query=vector,
-                    limit=1,
+                    limit=3,
                     score_threshold=self.similarity_threshold,
                     with_payload=True,
                 )
                 points = search_results.points
                 if points:
-                    hit = points[0]
-                    payload = hit.payload or {}
-                    cached_query_type = payload.get("query_type", "")
-                    cached_entities = set(e.strip().lower() for e in payload.get("extracted_entities", []))
+                    for hit in points:
+                        payload = hit.payload or {}
+                        cached_query_type = payload.get("query_type", "")
+                        cached_entities = set(e.strip().lower() for e in payload.get("extracted_entities", []))
+                        cached_category = (payload.get("category_filter") or "").strip().upper() or None
+                        cached_entity = (payload.get("entity_type") or "").strip().lower() or None
+                        cached_date = (payload.get("effective_date") or "").strip() or None
+                        cached_hist = bool(payload.get("historical_mode", False))
+                        cached_corpus = str(payload.get("corpus_version", "3.0")).strip()
 
-                    # Entity Guard check
-                    if cached_query_type == query_type and cached_entities == extracted_set:
-                        cached_response = payload.get("response")
-                        self._hits += 1
-                        return {
-                            "response": cached_response,
-                            "cache_hit": True,
-                            "similarity_score": hit.score,
-                            "matched_question": payload.get("question"),
-                        }
+                        # Multi-Dimensional Isolation Gate
+                        if (
+                            cached_query_type == query_type
+                            and cached_entities == extracted_set
+                            and cached_category == norm_category
+                            and cached_entity == norm_entity
+                            and cached_date == norm_date
+                            and cached_hist == norm_hist
+                            and cached_corpus == norm_corpus
+                        ):
+                            cached_response = payload.get("response")
+                            self._hits += 1
+                            return {
+                                "response": cached_response,
+                                "cache_hit": True,
+                                "similarity_score": hit.score,
+                                "matched_question": payload.get("question"),
+                            }
             except Exception as e:
+                global _MODULE_QDRANT_DISABLED
+                _MODULE_QDRANT_DISABLED = True
                 self._qdrant_disabled = True
                 logger.debug(f"Qdrant cache lookup unavailable: {e}. Switching to in-memory cache.")
 
@@ -146,9 +195,22 @@ class EntityScopedSemanticCache:
         for key, entry in self._memory_cache.items():
             entry_qtype = entry.get("query_type", "")
             entry_entities = entry.get("extracted_entities_set", set())
+            entry_category = (entry.get("category_filter") or "").strip().upper() or None
+            entry_entity = (entry.get("entity_type") or "").strip().lower() or None
+            entry_date = (entry.get("effective_date") or "").strip() or None
+            entry_hist = bool(entry.get("historical_mode", False))
+            entry_corpus = str(entry.get("corpus_version", "3.0")).strip()
 
-            # Entity guard
-            if entry_qtype != query_type or entry_entities != extracted_set:
+            # Multi-Dimensional Isolation Gate
+            if (
+                entry_qtype != query_type
+                or entry_entities != extracted_set
+                or entry_category != norm_category
+                or entry_entity != norm_entity
+                or entry_date != norm_date
+                or entry_hist != norm_hist
+                or entry_corpus != norm_corpus
+            ):
                 continue
 
             entry_vec = entry.get("vector_norm")
@@ -178,10 +240,12 @@ class EntityScopedSemanticCache:
         response: CitedResponse,
         category_filter: Optional[str] = None,
         entity_type: Optional[str] = None,
+        effective_date: Optional[str] = None,
+        historical_mode: bool = False,
         corpus_version: str = "3.0",
     ) -> bool:
         """
-        Verified Write-Through Policy:
+        Verified Write-Through Policy with Multi-Dimensional Metadata Isolation:
         Strict eligibility gates:
         1. risk_level != 'UNVERIFIED'
         2. len(citations) > 0 (Never cache zero-citation responses)
@@ -202,27 +266,31 @@ class EntityScopedSemanticCache:
             self._rejections += 1
             return False
 
-        if not extracted_entities:
-            extracted_entities = extract_regulatory_entities(question)
+        extracted_entities = extract_regulatory_entities(question)
 
         extracted_set = set(e.strip().lower() for e in extracted_entities)
 
-        self.init_cache_collection(recreate=False)
-        vector = list(self.dense_model.embed([question]))[0].tolist()
-        vector_np = np.array(vector, dtype=np.float32)
-        norm_v = np.linalg.norm(vector_np)
-        if norm_v > 0:
-            vector_np = vector_np / norm_v
+        norm_category = (category_filter or "").strip().upper() or None
+        norm_entity = (entity_type or "").strip().lower() or None
+        norm_date = (effective_date or "").strip() or None
+        norm_hist = bool(historical_mode)
+        norm_corpus = str(corpus_version or "3.0").strip()
 
-        point_id = str(uuid.uuid5(uuid.NAMESPACE_DNS, f"cache_{question.strip().lower()}"))
+        self.init_cache_collection(recreate=False)
+        vector, vector_np = self._get_embedding(question)
+
+        cache_key_seed = f"cache_{question.strip().lower()}_{query_type}_{norm_category}_{norm_entity}_{norm_date}_{norm_hist}_{norm_corpus}"
+        point_id = str(uuid.uuid5(uuid.NAMESPACE_DNS, cache_key_seed))
 
         payload = {
             "question": question,
             "query_type": query_type,
             "extracted_entities": list(extracted_entities),
-            "category_filter": category_filter,
-            "entity_type": entity_type,
-            "corpus_version": corpus_version,
+            "category_filter": norm_category,
+            "entity_type": norm_entity,
+            "effective_date": norm_date,
+            "historical_mode": norm_hist,
+            "corpus_version": norm_corpus,
             "response": response.model_dump(),
         }
 
@@ -232,26 +300,32 @@ class EntityScopedSemanticCache:
             "query_type": query_type,
             "extracted_entities_set": extracted_set,
             "vector_norm": vector_np,
-            "category_filter": category_filter,
-            "entity_type": entity_type,
-            "corpus_version": corpus_version,
+            "category_filter": norm_category,
+            "entity_type": norm_entity,
+            "effective_date": norm_date,
+            "historical_mode": norm_hist,
+            "corpus_version": norm_corpus,
             "response": response.model_dump(),
         }
 
         # Upsert into Qdrant if available
-        try:
-            self.client.upsert(
-                collection_name=self.collection_name,
-                points=[
-                    models.PointStruct(
-                        id=point_id,
-                        vector=vector,
-                        payload=payload
-                    )
-                ]
-            )
-        except Exception as e:
-            logger.debug(f"Could not upsert into Qdrant cache collection: {e}. Memory cache updated.")
+        if not self._qdrant_disabled:
+            try:
+                self.client.upsert(
+                    collection_name=self.collection_name,
+                    points=[
+                        models.PointStruct(
+                            id=point_id,
+                            vector=vector,
+                            payload=payload
+                        )
+                    ]
+                )
+            except Exception as e:
+                global _MODULE_QDRANT_DISABLED
+                _MODULE_QDRANT_DISABLED = True
+                self._qdrant_disabled = True
+                logger.debug(f"Could not upsert into Qdrant cache collection: {e}. Memory cache updated.")
 
         self._writes += 1
         return True

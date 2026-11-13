@@ -1,7 +1,14 @@
 """Comprehensive Idempotent Indexing Script for RBI Regulatory Corpus with Version Metadata."""
 
-import json
+import sys
 from pathlib import Path
+
+# Add project root to sys.path
+ROOT_DIR = Path(__file__).resolve().parent.parent
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
+
+import json
 from src.ingestion.chunker import TwoTierChunker
 from src.retrieval.vector_store import RBIHybridVectorStore
 
@@ -12,7 +19,7 @@ CORPUS_REGISTRY = [
         "metadata": {
             "document_id": "RBI_DL_2025",
             "title": "Reserve Bank of India (Digital Lending) Directions, 2025",
-            "circular_number": "RBI/2025-26/36",
+            "circular_number": "RBI/2025-26/36 (DOR.STR.REC.19/21.07.001/2025-26)",
             "date": "2025-05-08",
             "status": "ACTIVE",
             "version": "2.0"
@@ -27,7 +34,7 @@ CORPUS_REGISTRY = [
             "circular_number": "RBI/DBR/2015-16/18",
             "date": "2016-02-25",
             "status": "ACTIVE",
-            "version": "Updated as on January 04, 2024"
+            "version": "Updated as on August 14, 2025"
         }
     },
     {
@@ -36,7 +43,7 @@ CORPUS_REGISTRY = [
         "metadata": {
             "document_id": "RBI_CYBER_2024",
             "title": "Master Directions on Cyber Resilience and Digital Payment Security Controls",
-            "circular_number": "RBI/DPSS/2024-25/123",
+            "circular_number": "RBI/DPSS/2024-25/123 (CO.DPSS.OVRST.No.S447/06-26-002/2024-25)",
             "date": "2024-07-30",
             "status": "ACTIVE",
             "version": "1.0"
@@ -90,14 +97,24 @@ def main(target_collection: str = None, recreate: bool = False):
         status_label = item["metadata"].get("status", "ACTIVE")
         print(f"[{item['category']}] {item['metadata']['document_id']} ({status_label}): {len(parents)} parents, {len(children)} children")
 
-    # Save complete parent docstore
-    chunker.save_parent_docstore(all_parents, "data/parent_docstore.json")
-
-    # Index child chunks into Qdrant
+    # Index child chunks into Qdrant using safe atomic re-indexing.
+    # IMPORTANT: save_parent_docstore is called ONLY inside the on_success
+    # callback, which fires after the staging collection is fully verified and
+    # promoted to production.  This prevents the disk docstore from diverging
+    # from Qdrant when indexing fails partway through.
     vector_store = RBIHybridVectorStore(docstore_path="data/parent_docstore.json")
     col = target_collection or vector_store.collection_name
-    vector_store.init_collection(collection_name=col, recreate=recreate)
-    vector_store.index_child_chunks(all_children, batch_size=64, target_collection=col)
+    def _persist_docstore():
+        chunker.save_parent_docstore(all_parents, "data/parent_docstore.json")
+        import src.retrieval.vector_store as _vs
+        _vs._PARENT_DOCSTORE = None
+
+    vector_store.atomic_reindex(
+        all_children,
+        batch_size=64,
+        target_collection=col,
+        on_success=_persist_docstore,
+    )
 
     # Verification report
     try:

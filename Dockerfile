@@ -30,6 +30,7 @@ print('Pre-cached all ONNX model weights successfully!')\
 COPY src/ ./src/
 COPY data/ ./data/
 COPY frontend/ ./frontend/
+COPY scripts/ ./scripts/
 
 EXPOSE 8000 8501
 

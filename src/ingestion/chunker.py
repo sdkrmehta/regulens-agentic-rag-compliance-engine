@@ -137,7 +137,13 @@ class TwoTierChunker:
         circular_name = meta_dict.get("title") or meta_dict.get("circular_name") or f"RBI {doc_category} Direction"
         circular_number = meta_dict.get("circular_number", "")
         document_status = meta_dict.get("status") or meta_dict.get("document_status", "ACTIVE")
-        effective_date = meta_dict.get("effective_date") or meta_dict.get("date", "2024-01-01")
+        effective_date = meta_dict.get("effective_date") or meta_dict.get("date")
+        if effective_date:
+            from datetime import date
+            try:
+                effective_date = date.fromisoformat(str(effective_date)[:10]).isoformat()
+            except ValueError:
+                effective_date = None
         doc_version = meta_dict.get("version", "1.0")
 
         # Split into structural sections by heading
@@ -168,8 +174,12 @@ class TwoTierChunker:
 
             for sub_text in sub_sections:
                 parent_idx += 1
-                page_num = current_page if (current_page and current_page > 0) else max(1, (parent_idx // 2) + 1)
-                page_tag = f"_P{page_num:03d}"
+                if current_page and current_page > 0:
+                    page_num = int(current_page)
+                    page_tag = f"_P{page_num:03d}"
+                else:
+                    page_num = None
+                    page_tag = "_Punknown"
                 parent_id = f"{doc_id}{page_tag}_S{parent_idx:04d}"
 
                 has_table = is_inside_table(sub_text)
@@ -217,7 +227,7 @@ class TwoTierChunker:
                         "doc_category": doc_category,
                         "section_clause": section_clause,
                         "source_location": breadcrumb,
-                        "page_number": current_page,
+                        "page_number": page_num,
                         "document_status": document_status,
                         "effective_date": effective_date,
                         "document_version": doc_version,
@@ -231,6 +241,11 @@ class TwoTierChunker:
     def save_parent_docstore(self, parents: Dict[str, Dict[str, Any]], filepath: str = "data/parent_docstore.json"):
         path = Path(filepath)
         path.parent.mkdir(parents=True, exist_ok=True)
-        with open(path, "w", encoding="utf-8") as f:
+        temp_path = path.with_name(path.name + ".tmp")
+        with open(temp_path, "w", encoding="utf-8") as f:
             json.dump(parents, f, indent=2, ensure_ascii=False)
+            f.flush()
+            import os
+            os.fsync(f.fileno())
+        os.replace(temp_path, path)
         print(f"[SUCCESS] Saved {len(parents)} parent sections to {path}")

@@ -1,18 +1,21 @@
 """Streamlit Dual-Tab RBI Regulatory Compliance Workstation."""
 
-import os
 import sys
-import time
 from pathlib import Path
+
+# Unconditionally add project root and /app to sys.path at the very top of execution
+ROOT_DIR = Path(__file__).resolve().parent.parent
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
+if "/app" not in sys.path:
+    sys.path.insert(0, "/app")
+
+import os
+import time
 from typing import Dict, Any, Optional
 
 import requests
 import streamlit as st
-
-# Ensure project root is in sys.path for standalone or local runs
-ROOT_DIR = Path(__file__).resolve().parent.parent
-if str(ROOT_DIR) not in sys.path:
-    sys.path.insert(0, str(ROOT_DIR))
 
 st.set_page_config(
     page_title="ReguLens - RBI Compliance & Contract Auditor",
@@ -20,17 +23,30 @@ st.set_page_config(
     layout="wide",
 )
 
-FASTAPI_URL = os.getenv("FASTAPI_URL", "http://localhost:8000").rstrip("/")
+FASTAPI_URL = os.getenv("FASTAPI_URL", "http://fastapi-backend:8000").rstrip("/")
 
 
 def check_backend_health() -> Optional[Dict[str, Any]]:
-    """Probe FastAPI backend health and telemetry."""
-    try:
-        resp = requests.get(f"{FASTAPI_URL}/api/v1/metrics", timeout=2.0)
-        if resp.status_code == 200:
-            return resp.json()
-    except Exception:
-        pass
+    """Probe FastAPI backend health and telemetry across candidate container & host URLs."""
+    global FASTAPI_URL
+    candidate_urls = [
+        FASTAPI_URL,
+        "http://fastapi-backend:8000",
+        "http://localhost:8000",
+        "http://127.0.0.1:8000"
+    ]
+    seen = set()
+    for base_url in candidate_urls:
+        if not base_url or base_url in seen:
+            continue
+        seen.add(base_url)
+        try:
+            resp = requests.get(f"{base_url}/api/v1/metrics", timeout=2.0)
+            if resp.status_code == 200:
+                FASTAPI_URL = base_url
+                return resp.json()
+        except Exception:
+            continue
     return None
 
 
@@ -58,7 +74,6 @@ def get_inprocess_resources():
                 "auditor": audit_fintech_contract,
             }
         except Exception as e:
-            st.error(f"Failed to load in-process resources: {e}")
             _inprocess_resources = {}
     return _inprocess_resources
 
@@ -71,21 +86,80 @@ st.sidebar.divider()
 
 if backend_connected:
     st.sidebar.success(f"🟢 **FastAPI Backend Connected** (`{FASTAPI_URL}`)")
-    indexed_chunks = str(backend_metrics.get("indexed_chunks", 577))
-    parent_clauses = str(backend_metrics.get("parent_clauses", 394))
+    indexed_chunks = backend_metrics.get("indexed_chunks", 0)
+    parent_clauses = backend_metrics.get("parent_clauses", 0)
+    active_circulars = backend_metrics.get("active_circulars_count", 0)
+    repealed_circulars = backend_metrics.get("repealed_circulars_count", 0)
+    corpus_version = backend_metrics.get("corpus_version", "unknown")
     telemetry = backend_metrics.get("cache_telemetry", {})
     hit_ratio = telemetry.get("hit_ratio", 0.0)
+    cache_hits = telemetry.get("hits", 0)
+    cache_misses = telemetry.get("misses", 0)
 else:
     st.sidebar.info("🟡 **Standalone Mode** (Direct In-Process Engine)")
+    if st.sidebar.button("🔄 Connect to FastAPI Backend"):
+        st.rerun()
     in_res = get_inprocess_resources()
     docstore = in_res.get("docstore", {})
-    indexed_chunks = "577"
-    parent_clauses = str(len(docstore)) if docstore else "394"
-    hit_ratio = 0.0
+    vstore = in_res.get("vector_store")
+    cache_obj = in_res.get("cache")
+
+    try:
+        if vstore and vstore.client:
+            col_info = vstore.client.get_collection(vstore.collection_name)
+            indexed_chunks = col_info.points_count
+        else:
+            indexed_chunks = len(docstore)
+    except Exception:
+        indexed_chunks = len(docstore)
+
+    parent_clauses = len(docstore)
+    telemetry = cache_obj.get_telemetry() if cache_obj else {}
+    hit_ratio = telemetry.get("hit_ratio", 0.0)
+    cache_hits = telemetry.get("hits", 0)
+    cache_misses = telemetry.get("misses", 0)
+
+    # Derive active/repealed counts and corpus version from the authoritative registry —
+    # never hardcode these values so they stay accurate as documents are added or deprecated.
+    _active_circulars = 0
+    _repealed_circulars = 0
+    from src.config import settings as _settings
+    _corpus_version = getattr(_settings, "CORPUS_VERSION", "unknown")
+    integrity_status = False
+    try:
+        import json as _json
+        from pathlib import Path as _Path
+        _reg_path = _Path("data/regulatory_registry.json")
+        if not _reg_path.exists():
+            _reg_path = _Path(__file__).parent.parent / "data" / "regulatory_registry.json"
+        if _reg_path.exists():
+            _reg_data = _json.loads(_reg_path.read_text(encoding="utf-8"))
+            _docs = _reg_data.get("documents", [])
+            _active_circulars = sum(1 for d in _docs if d.get("document_status") == "ACTIVE")
+            _repealed_circulars = sum(1 for d in _docs if d.get("document_status") in ["REPEALED", "SUPERSEDED"])
+        from src.ingestion.integrity import verify_regulatory_document_integrity
+        integrity_status = verify_regulatory_document_integrity().get("all_valid", False)
+    except Exception:
+        _active_circulars = 0
+        _repealed_circulars = 0
+    active_circulars = _active_circulars
+    repealed_circulars = _repealed_circulars
+    corpus_version = _corpus_version
+    regulatory_integrity_verified = integrity_status
+
+if backend_connected:
+    regulatory_integrity_verified = bool(backend_metrics.get("regulatory_integrity_verified", False))
 
 col_s1, col_s2 = st.sidebar.columns(2)
-col_s1.metric("Indexed Chunks", indexed_chunks)
-col_s2.metric("Parent Clauses", parent_clauses)
+col_s1.metric("Indexed Chunks", f"{indexed_chunks:,}" if isinstance(indexed_chunks, int) else str(indexed_chunks))
+col_s2.metric("Parent Clauses", f"{parent_clauses:,}" if isinstance(parent_clauses, int) else str(parent_clauses))
+
+col_s3, col_s4 = st.sidebar.columns(2)
+col_s3.metric("Cache Hit Ratio", f"{hit_ratio * 100.0:.1f}%")
+col_s4.metric("Active Circulars", f"{active_circulars}")
+
+st.sidebar.caption(f"Live Cache Telemetry: **{cache_hits}** hits | **{cache_misses}** misses | Corpus V{corpus_version}")
+st.sidebar.caption("Regulatory source integrity: " + ("VERIFIED" if regulatory_integrity_verified else "UNVERIFIED"))
 
 enable_cache = st.sidebar.toggle("Entity-Safe Semantic Cache", value=True)
 category_filter = st.sidebar.selectbox(
@@ -163,13 +237,17 @@ with tab1:
                         cached_data = cache.check_cache(
                             question=query_input,
                             query_type="compliance_qa",
-                            extracted_entities=[]
+                            extracted_entities=[],
+                            category_filter=cat_filter_val,
+                            entity_type=None,
+                            effective_date=None,
+                            historical_mode=historical_mode,
+                            corpus_version=corpus_version,
                         )
                         if cached_data:
                             cache_hit = True
                             final_resp = cached_data["response"]
                             st.write("✓ Semantic Cache Hit! Intercepted repeat query with Entity Guard.")
-
                     if not cache_hit and agent:
                         st.write("2. 🧭 Routing Intent & Acronym Expansion...")
                         st.write("3. 🔎 Executing Hybrid Dense + Sparse BM25 RRF Search & FlashRank Reranking...")
@@ -192,7 +270,12 @@ with tab1:
                                     question=query_input,
                                     query_type="compliance_qa",
                                     extracted_entities=final_state.get("extracted_entities", []),
-                                    response=resp_obj
+                                    response=resp_obj,
+                                    category_filter=cat_filter_val,
+                                    entity_type=None,
+                                    effective_date=None,
+                                    historical_mode=historical_mode,
+                                    corpus_version=corpus_version,
                                 )
 
                 status_box.update(label="✓ Compliance Evaluation Complete", state="complete", expanded=False)
@@ -223,7 +306,8 @@ with tab1:
                         with st.expander(f"Citation {idx}: {cit.get('circular_name')} — {cit.get('section_clause')} ({page_str})"):
                             st.markdown(f"**Verification Status:** {badge}")
                             st.markdown(f"**Verbatim Quote from Authoritative Regulatory Text:**")
-                            st.code(f'"{cit.get("verbatim_quote", "")}"', language="text")
+                            _vq = cit.get("verbatim_quote", "")
+                            st.code('"' + _vq + '"', language="text")
             else:
                 st.error("No compliance response could be generated. Please verify service logs.")
 

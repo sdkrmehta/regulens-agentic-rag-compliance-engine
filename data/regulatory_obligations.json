@@ -1,0 +1,284 @@
+{
+  "version": "3.1.0",
+  "last_updated": "2026-11-13",
+  "regulator": "Reserve Bank of India",
+  "obligations": [
+    {
+      "obligation_id": "OBL_DL_001",
+      "category": "DIGITAL_LENDING",
+      "title": "Mobile Resource and Contact Scraping Prohibition",
+      "circular_name": "Reserve Bank of India (Digital Lending) Directions, 2025",
+      "circular_number": "RBI/2025-26/36 (DOR.STR.REC.19/21.07.001/2025-26)",
+      "clause": "Clause 10.2: Collection, Usage and Sharing of Borrower Data",
+      "page_number": null,
+      "rule_type": "PROHIBITION",
+      "keywords": [
+        "contact",
+        "phonebook",
+        "call log",
+        "gallery",
+        "media",
+        "telephony",
+        "file and media",
+        "photo gallery"
+      ],
+      "statutory_rule": "DLAs are explicitly prohibited from accessing mobile phone resources, including file and media storage, contact lists, phonebooks, call logs, and telephony functions.",
+      "remediation_advice": "Remove all clauses granting access to borrower contacts, call logs, or media files. Limit mobile permissions strictly to one-time camera/microphone/location access for onboarding and KYC with prior explicit consent.",
+      "risk_level": "CRITICAL",
+      "source_url": "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=12848&Mode=0"
+    },
+    {
+      "obligation_id": "OBL_DL_002",
+      "category": "DIGITAL_LENDING",
+      "title": "Statutory Look-Up / Cooling-Off Period Duration",
+      "circular_name": "Reserve Bank of India (Digital Lending) Directions, 2025",
+      "circular_number": "RBI/2025-26/36 (DOR.STR.REC.19/21.07.001/2025-26)",
+      "clause": "Direction 10(i): Cooling-off period",
+      "page_number": null,
+      "rule_type": "COOLING_OFF_VALIDATION",
+      "keywords": [
+        "cooling-off",
+        "cooling off",
+        "look-up",
+        "lookup",
+        "look up"
+      ],
+      "statutory_rule": "The Board-determined cooling-off period shall not be less than one day, regardless of loan tenor.",
+      "remediation_advice": "Set a cooling-off period of at least one day for every digital loan.",
+      "risk_level": "HIGH",
+      "source_url": "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=12848&Mode=0",
+      "minimum_days": 1
+    },
+    {
+      "obligation_id": "OBL_DL_003",
+      "category": "DIGITAL_LENDING",
+      "title": "Zero Prepayment or Foreclosure Charges During Cooling-Off",
+      "circular_name": "Reserve Bank of India (Digital Lending) Directions, 2025",
+      "circular_number": "RBI/2025-26/36 (DOR.STR.REC.19/21.07.001/2025-26)",
+      "clause": "Direction 10(i)-(ii): Exit option and processing fee",
+      "page_number": null,
+      "rule_type": "PROHIBITION",
+      "keywords": [
+        "prepayment",
+        "foreclosure",
+        "exit penalty",
+        "pre-payment",
+        "penalty fee",
+        "foreclosure fee",
+        "exit charge"
+      ],
+      "negation_keywords": [
+        "without any penalty",
+        "without penalty",
+        "no foreclosure",
+        "no prepayment penalty",
+        "exempt from",
+        "waived",
+        "free of charge"
+      ],
+      "statutory_rule": "Borrowers may exit during the cooling-off period by paying principal and proportionate APR without penalty; a reasonable one-time processing fee may be retained if disclosed upfront.",
+      "remediation_advice": "Remove penalties; retain only a reasonable one-time processing fee disclosed upfront.",
+      "risk_level": "CRITICAL",
+      "source_url": "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=12848&Mode=0"
+    },
+    {
+      "obligation_id": "OBL_DL_004",
+      "category": "DIGITAL_LENDING",
+      "title": "Direct Disbursal and Repayment Prohibition on Pass-Through / Pool Accounts",
+      "circular_name": "Reserve Bank of India (Digital Lending) Directions, 2025",
+      "circular_number": "RBI/2025-26/36 (DOR.STR.REC.19/21.07.001/2025-26)",
+      "clause": "Clause 4.1 & 4.2: Direct Disbursals & Repayments (No Pool Accounts)",
+      "page_number": null,
+      "rule_type": "PROHIBITION",
+      "keywords": [
+        "pool account",
+        "escrow pool",
+        "pass-through account",
+        "lsp account",
+        "centralized collection account",
+        "collection pool"
+      ],
+      "statutory_rule": "REs shall ensure that all loan disbursals and repayments are executed directly into the bank account of the borrower without any pass-through or pool account of any third party or LSP.",
+      "remediation_advice": "Eliminate routing through third-party or LSP escrow/collection pool accounts. Disburse loan funds directly into borrower bank account.",
+      "risk_level": "CRITICAL",
+      "source_url": "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=12848&Mode=0"
+    },
+    {
+      "obligation_id": "OBL_DL_005",
+      "category": "DIGITAL_LENDING",
+      "title": "Prohibition of Biometric Data and Credential Storage",
+      "circular_name": "Reserve Bank of India (Digital Lending) Directions, 2025",
+      "circular_number": "RBI/2025-26/36 (DOR.STR.REC.19/21.07.001/2025-26)",
+      "clause": "Clause 11.2: Biometric Data Storage Prohibition",
+      "page_number": null,
+      "rule_type": "PROHIBITION",
+      "keywords": [
+        "biometric",
+        "fingerprint",
+        "face template",
+        "biometric template",
+        "store biometric"
+      ],
+      "statutory_rule": "REs shall ensure that no biometric data or raw fingerprint/facial templates are stored or collected on the servers or systems of DLAs or LSPs.",
+      "remediation_advice": "Remove all clauses permitting storage or retention of borrower biometric data on DLA or partner servers.",
+      "risk_level": "CRITICAL",
+      "source_url": "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=12848&Mode=0"
+    },
+    {
+      "obligation_id": "OBL_DL_006",
+      "category": "DIGITAL_LENDING",
+      "title": "Default Loss Guarantee (DLG) 5% Portfolio Cap",
+      "circular_name": "Reserve Bank of India (Digital Lending) Directions, 2025",
+      "circular_number": "RBI/2025-26/36 (DOR.STR.REC.19/21.07.001/2025-26)",
+      "clause": "Direction 23: Cap on DLG",
+      "page_number": null,
+      "rule_type": "PERCENTAGE_CAP",
+      "max_percentage": 5.0,
+      "keywords": [
+        "dlg",
+        "fldg",
+        "default loss guarantee",
+        "first loss default",
+        "loss sharing"
+      ],
+      "statutory_rule": "The DLG cover shall not exceed five percent of the total amount disbursed in the underlying loan portfolio.",
+      "remediation_advice": "Cap DLG at 5% of the total amount disbursed in the underlying loan portfolio.",
+      "risk_level": "HIGH",
+      "source_url": "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=12848&Mode=0"
+    },
+    {
+      "obligation_id": "OBL_DL_007",
+      "category": "DIGITAL_LENDING",
+      "title": "Mandatory Key Fact Statement (KFS) Disclosure Before Loan Execution",
+      "circular_name": "Reserve Bank of India (Digital Lending) Directions, 2025",
+      "circular_number": "RBI/2025-26/36 (DOR.STR.REC.19/21.07.001/2025-26)",
+      "clause": "Clause 6.1 & 6.2: Key Fact Statement (KFS) Mandatory Disclosure",
+      "page_number": null,
+      "rule_type": "PROHIBITION",
+      "keywords": [
+        "kfs",
+        "key fact statement",
+        "without kfs",
+        "no kfs",
+        "skip kfs"
+      ],
+      "negation_keywords": [],
+      "context_keywords": [
+        "skip",
+        "without",
+        "not required",
+        "waive",
+        "exempt",
+        "omit",
+        "bypass"
+      ],
+      "statutory_rule": "REs must mandatorily provide a standardised Key Fact Statement (KFS) to the borrower before execution of the loan contract, disclosing the all-inclusive APR, repayment schedule, recovery mechanism, and grievance redressal contact.",
+      "remediation_advice": "Ensure the KFS is provided to the borrower before contract execution containing the all-inclusive APR, fees, repayment schedule, and grievance officer contact.",
+      "risk_level": "HIGH",
+      "source_url": "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=12848&Mode=0"
+    },
+    {
+      "obligation_id": "OBL_DL_008",
+      "category": "DIGITAL_LENDING",
+      "title": "Interest Rate Disclosure and Annual Percentage Rate (APR) Transparency",
+      "circular_name": "Reserve Bank of India (Digital Lending) Directions, 2025",
+      "circular_number": "RBI/2025-26/36 (DOR.STR.REC.19/21.07.001/2025-26)",
+      "clause": "Clause 7.1: Annual Percentage Rate (APR) Disclosure Obligation",
+      "page_number": null,
+      "rule_type": "PROHIBITION",
+      "keywords": [
+        "hidden charge",
+        "undisclosed fee",
+        "hidden fee",
+        "undisclosed charge",
+        "hidden interest"
+      ],
+      "statutory_rule": "REs shall ensure complete and upfront disclosure of the Annual Percentage Rate (APR) inclusive of all fees, charges, and cost components. No hidden charges or undisclosed fees may be levied on the borrower.",
+      "remediation_advice": "Disclose all fees and charges upfront in the KFS and loan agreement as part of the all-inclusive APR. Remove any provision permitting hidden or undisclosed charges.",
+      "risk_level": "HIGH",
+      "source_url": "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=12848&Mode=0"
+    },
+    {
+      "obligation_id": "OBL_KYC_001",
+      "category": "KYC",
+      "title": "V-CIP Video Encryption and Indian Geo-Tagging Standards",
+      "circular_name": "Master Direction - Know Your Customer (KYC) Direction, 2016",
+      "circular_number": "RBI/DBR/2015-16/18 (Master Direction DBR.AML.BC.No.81/14.01.001/2015-16)",
+      "clause": "Clause 18 & 27: V-CIP Live Video and Geo-Tagging Standards",
+      "page_number": null,
+      "rule_type": "TECHNICAL_STANDARD",
+      "keywords": [
+        "v-cip",
+        "vcip",
+        "video kyc",
+        "geo-tagging",
+        "liveness check"
+      ],
+      "statutory_rule": "V-CIP live video interactions must include real-time liveness checks, AES-256 encrypted channels, and verifiable geo-tagging confirming customer physical presence within Indian territory.",
+      "remediation_advice": "Incorporate explicit contractual stipulations mandating AES-256 video encryption, active liveness validation, and Indian geo-tagging checks during V-CIP.",
+      "risk_level": "HIGH"
+    },
+    {
+      "obligation_id": "OBL_KYC_002",
+      "category": "KYC",
+      "title": "Periodic KYC Updation Timeline Schedule",
+      "circular_name": "Master Direction - Know Your Customer (KYC) Direction, 2016",
+      "circular_number": "RBI/DBR/2015-16/18 (Master Direction DBR.AML.BC.No.81/14.01.001/2015-16)",
+      "clause": "Clause 38: Periodic Updation of KYC",
+      "page_number": null,
+      "rule_type": "SCHEDULE_VALIDATION",
+      "keywords": [
+        "periodic updation",
+        "re-kyc",
+        "kyc update schedule",
+        "periodic kyc"
+      ],
+      "statutory_rule": "Periodic KYC update must be carried out at least once every 2 years for high-risk customers, once every 8 years for medium-risk customers, and once every 10 years for low-risk customers.",
+      "remediation_advice": "Align customer KYC review schedules to RBI Section 38 risk tiers: at least every 2 years (high risk), 8 years (medium risk), and 10 years (low risk).",
+      "risk_level": "HIGH"
+    },
+    {
+      "obligation_id": "OBL_CYB_001",
+      "category": "CYBER_RESILIENCE",
+      "title": "Mandatory 6-Hour Cyber Incident Reporting Timeline",
+      "circular_name": "Master Direction on Cyber Resilience and Digital Payment Security Controls for non-bank Payment System Operators (PSOs)",
+      "circular_number": "RBI/2024-25/54 (DOS.CO.CSITE.SEC.No.54/31.01.015/2024-25)",
+      "clause": "Clause 14: Cybersecurity Incident Reporting Timeline",
+      "page_number": null,
+      "rule_type": "HOURLY_SLA",
+      "max_hours": 6.0,
+      "keywords": [
+        "incident report",
+        "cert-in",
+        "breach notification",
+        "cyber incident",
+        "cyber attack"
+      ],
+      "statutory_rule": "Payment System Operators must report any cybersecurity incident to CERT-In and RBI within six (6) hours of detection.",
+      "remediation_advice": "Amend cybersecurity incident reporting SLA to a maximum of six (6) hours from detection.",
+      "risk_level": "CRITICAL"
+    },
+    {
+      "obligation_id": "OBL_CYB_002",
+      "category": "CYBER_RESILIENCE",
+      "title": "Multi-Factor Authentication (MFA) Mandatory for Digital Payment Access",
+      "circular_name": "Master Direction on Cyber Resilience and Digital Payment Security Controls for non-bank Payment System Operators (PSOs)",
+      "circular_number": "RBI/2024-25/54 (DOS.CO.CSITE.SEC.No.54/31.01.015/2024-25)",
+      "clause": "Clause 7.3: Multi-Factor Authentication (MFA) Requirement",
+      "page_number": null,
+      "rule_type": "PROHIBITION",
+      "keywords": [
+        "single factor",
+        "single-factor",
+        "password only",
+        "no mfa",
+        "without mfa",
+        "bypass mfa",
+        "skip mfa"
+      ],
+      "statutory_rule": "PSOs shall implement Multi-Factor Authentication (MFA) for all customer-facing digital payment transactions and backend administrative access to payment systems.",
+      "remediation_advice": "Implement MFA for all digital payment access points. Single-factor (password-only) authentication is prohibited for payment system operator interfaces.",
+      "risk_level": "CRITICAL"
+    }
+  ]
+}

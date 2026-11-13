@@ -74,7 +74,11 @@ def router_node(state: AgentState) -> Dict[str, Any]:
 
     # Detect explicit historical intent
     q_lower = question.lower()
-    is_historical = any(k in q_lower for k in ["2022 guidelines", "old guidelines", "repealed", "historical", "prior to 2025", "earlier circular"])
+    # The request-level toggle is explicit intent and must survive routing, even
+    # when the question itself contains no historical wording.
+    is_historical = bool(state.get("historical_query", False)) or any(
+        k in q_lower for k in ["2022 guidelines", "old guidelines", "repealed", "historical", "prior to 2025", "earlier circular"]
+    )
 
     if llm:
         structured_llm = llm.with_structured_output(RouterOutput)
@@ -133,6 +137,9 @@ def retrieve_node(state: AgentState) -> Dict[str, Any]:
     search_query = state.get("search_query") or state.get("question", "")
     category_filter = state.get("category_filter") or state.get("target_category")
     historical_mode = state.get("historical_query", False)
+    regulator = state.get("regulator")
+    entity_type = state.get("entity_type_filter") or state.get("target_entity_type")
+    effective_date = state.get("effective_date")
 
     try:
         store = get_vector_store()
@@ -140,6 +147,9 @@ def retrieve_node(state: AgentState) -> Dict[str, Any]:
             query=search_query,
             doc_category=category_filter,
             historical_mode=historical_mode,
+            regulator=regulator,
+            entity_type=entity_type,
+            effective_date=effective_date,
             prefetch_limit=settings.RRF_PREFETCH_LIMIT,
             top_k=settings.RERANK_TOP_K,
         )
@@ -151,12 +161,19 @@ def retrieve_node(state: AgentState) -> Dict[str, Any]:
 
 
 def grader_node(state: AgentState) -> Dict[str, Any]:
-    """Single-call batch grader: evaluate relevance and authority of retrieved parents."""
+    """Single-call batch grader: evaluate relevance and authority of retrieved parents.
+
+    Historical mode fix: when historical_query=True, repealed/superseded documents are
+    intentionally retrieved and must NOT be discarded by the authority gate. The grader
+    still filters by relevance but relaxes the is_authoritative requirement so that
+    historically-repealed documents (e.g. RBI_DL_2022) survive the grading step.
+    """
     retrieved = state.get("retrieved_parents", [])
     if not retrieved:
         return {"graded_parents": []}
 
     question = state.get("question", "")
+    is_historical = bool(state.get("historical_query", False))
     llm = get_llm(settings.FAST_LLM_MODEL, temperature=0.0)
 
     if llm:
@@ -171,18 +188,27 @@ def grader_node(state: AgentState) -> Dict[str, Any]:
         ]
         try:
             output: BatchGradeOutput = structured_llm.invoke(messages)
-            relevant_ids = {g.parent_id for g in output.grades if g.is_relevant and g.is_authoritative}
+            if is_historical:
+                # In historical mode: keep any relevant document regardless of authority
+                # (repealed regulations are authoritative for historical queries by design)
+                relevant_ids = {g.parent_id for g in output.grades if g.is_relevant}
+            else:
+                # In active-only mode: enforce both relevance AND authority gates
+                relevant_ids = {g.parent_id for g in output.grades if g.is_relevant and g.is_authoritative}
             graded = [p for p in retrieved if p["parent_id"] in relevant_ids]
             return {"graded_parents": graded}
         except Exception as e:
             print(f"[WARNING] Grader LLM call failed: {e}. Using deterministic heuristic.")
 
-    # Rule-based relevance check
+    # Rule-based relevance check (also historical-mode-aware)
     q_words = set(re.findall(r"\w+", question.lower())) - {"what", "is", "the", "under", "for", "and", "in", "to", "how", "are", "of"}
     graded = []
     for p in retrieved:
         p_text = p.get("text", "").lower()
         if "cryptocurrency mining" in question.lower() or "crypto mining" in question.lower():
+            continue
+        # In non-historical mode: pre-filter repealed/superseded documents
+        if not is_historical and p.get("document_status") in ("SUPERSEDED", "REPEALED"):
             continue
         overlap = sum(1 for w in q_words if w in p_text)
         if overlap >= 2 or p.get("rrf_score", 0.0) > 0.015:
@@ -256,8 +282,9 @@ def generator_node(state: AgentState) -> Dict[str, Any]:
             verified_citations = []
             has_unverified = False
 
+            is_hist = state.get("historical_query", False)
             for cit in resp.citations:
-                is_v, v_status, reason = verify_citation_against_source(cit, graded_parents)
+                is_v, v_status, reason = verify_citation_against_source(cit, graded_parents, allow_historical=is_hist)
                 cit.verified = is_v
                 cit.verification_status = v_status
                 verified_citations.append(cit)

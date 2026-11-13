@@ -1,4 +1,11 @@
+import sys
 from pathlib import Path
+
+# Add project root to sys.path
+ROOT_DIR = Path(__file__).resolve().parent.parent
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
+
 from src.ingestion.html_to_markdown import convert_rbi_html_to_markdown
 from src.ingestion.chunker import TwoTierChunker, DOC_METADATA_MAP
 from src.retrieval.vector_store import RBIHybridVectorStore
@@ -37,11 +44,20 @@ for html_file, cat, md_path in files:
     all_children.extend(children)
     print(f"[{cat}] {len(parents)} parents, {len(children)} children")
 
-chunker.save_parent_docstore(all_parents, "data/parent_docstore.json")
 print(f"Total: {len(all_parents)} parents, {len(all_children)} children.")
 
-# Index into Qdrant
+# Safe, atomic re-index into Qdrant.
+# The parent docstore is written to disk ONLY inside on_success, which fires
+# after the staging collection is verified and promoted to production.
+# This guarantees the disk file and Qdrant are always in sync — if Qdrant
+# indexing fails, the old parent_docstore.json is left untouched.
 store = RBIHybridVectorStore(docstore_path="data/parent_docstore.json")
-store.init_collection(recreate=True)
-store.index_child_chunks(all_children, batch_size=64)
-print("Re-indexing complete!")
+
+def _persist_docstore():
+    chunker.save_parent_docstore(all_parents, "data/parent_docstore.json")
+    # Invalidate the in-process singleton so the next read picks up the new file.
+    import src.retrieval.vector_store as _vs
+    _vs._PARENT_DOCSTORE = None
+
+store.atomic_reindex(all_children, batch_size=64, on_success=_persist_docstore)
+print("Safe atomic re-indexing complete!")

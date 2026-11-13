@@ -38,6 +38,7 @@ class Settings(BaseSettings):
     # Agent Guardrails and Thresholds
     SEMANTIC_CACHE_THRESHOLD: float = 0.93
     MAX_AGENT_RETRIES: int = 2
+    CORPUS_VERSION: str = "3.0"
 
     # Langfuse Observability
     LANGFUSE_PUBLIC_KEY: Optional[str] = None

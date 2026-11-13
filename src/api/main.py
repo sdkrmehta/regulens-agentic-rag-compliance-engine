@@ -27,6 +27,7 @@ from src.retrieval.reranker import get_ranker
 from src.retrieval.semantic_cache import EntityScopedSemanticCache
 from src.agent.graph import compliance_agent
 from src.agent.auditor import audit_fintech_contract
+from src.ingestion.integrity import verify_regulatory_document_integrity
 
 # Global state loaded at lifespan boot
 lifespan_state: Dict[str, Any] = {}
@@ -80,7 +81,7 @@ def health_check():
 @app.get("/ready")
 @app.get("/api/v1/ready")
 def readiness_check():
-    """Readiness check: validates docstore, vector store, and model weights."""
+    """Readiness check: validates docstore, vector store, regulatory integrity, and model weights."""
     client = lifespan_state.get("client") or get_qdrant_client()
     docstore = lifespan_state.get("docstore") or get_parent_docstore()
 
@@ -90,12 +91,16 @@ def readiness_check():
     except Exception:
         points_count = 0
 
+    integrity = verify_regulatory_document_integrity()
+
     return {
-        "status": "ready" if len(docstore) > 0 else "degraded",
+        "status": "ready" if len(docstore) > 0 and integrity.get("all_valid", False) else "degraded",
         "qdrant_points_count": points_count,
         "parent_sections_count": len(docstore),
         "docstore_loaded": len(docstore) > 0,
         "models_cached": True,
+        "regulatory_data_integrity": integrity.get("all_valid", False),
+        "verified_documents_count": integrity.get("verified_count", 0),
     }
 
 
@@ -112,7 +117,7 @@ def list_regulatory_documents():
 
 @app.get("/api/v1/metrics")
 def get_system_metrics():
-    """Telemetry endpoint: return cache hit ratio, vector collection size, and SLAs."""
+    """Telemetry endpoint: return live cache hit ratio, vector collection size, and SLAs."""
     cache: EntityScopedSemanticCache = lifespan_state.get("cache") or EntityScopedSemanticCache()
     docstore = lifespan_state.get("docstore") or get_parent_docstore()
     client = lifespan_state.get("client") or get_qdrant_client()
@@ -123,9 +128,27 @@ def get_system_metrics():
     except Exception:
         points_count = 0
 
+    # Live circular counts from authoritative registry
+    registry_path = Path("data/regulatory_registry.json")
+    active_circulars = 0
+    repealed_circulars = 0
+    if registry_path.exists():
+        try:
+            with open(registry_path, "r", encoding="utf-8") as f:
+                reg_data = json.load(f)
+                docs = reg_data.get("documents", [])
+                active_circulars = sum(1 for d in docs if d.get("document_status") == "ACTIVE")
+                repealed_circulars = sum(1 for d in docs if d.get("document_status") in ["REPEALED", "SUPERSEDED"])
+        except Exception:
+            pass
+
     return {
         "indexed_chunks": points_count,
         "parent_clauses": len(docstore),
+        "active_circulars_count": active_circulars,
+        "repealed_circulars_count": repealed_circulars,
+        "corpus_version": getattr(settings, "CORPUS_VERSION", "3.0"),
+        "regulatory_integrity_verified": verify_regulatory_document_integrity().get("all_valid", False),
         "cache_telemetry": cache.get_telemetry(),
         "slas": {
             "cold_retrieval_target_s": 2.2,
@@ -145,13 +168,16 @@ def ask_compliance_question(req: QueryRequest):
 
     cache: EntityScopedSemanticCache = lifespan_state.get("cache") or EntityScopedSemanticCache()
 
-    # Step 1: Check Entity-Scoped Semantic Cache
+    # Step 1: Check Entity-Scoped Semantic Cache with 5-dimensional isolation
     cached_hit = cache.check_cache(
         question=question,
         query_type="compliance_qa",
         extracted_entities=[],
         category_filter=req.category_filter,
         entity_type=req.entity_type_filter,
+        effective_date=req.effective_date,
+        historical_mode=req.historical_mode,
+        corpus_version=getattr(settings, "CORPUS_VERSION", "3.0"),
     )
 
     if cached_hit:
@@ -168,6 +194,7 @@ def ask_compliance_question(req: QueryRequest):
         "question": question,
         "category_filter": req.category_filter,
         "entity_type_filter": req.entity_type_filter,
+        "effective_date": req.effective_date,
         "historical_query": req.historical_mode,
         "retry_count": 0,
         "search_query": question,
@@ -179,7 +206,7 @@ def ask_compliance_question(req: QueryRequest):
     if not final_response:
         raise HTTPException(status_code=500, detail="Failed to synthesize response.")
 
-    # Step 3: Verified Write-Through Cache
+    # Step 3: Verified Write-Through Cache with Multi-Dimensional Metadata
     extracted_entities = final_state.get("extracted_entities", [])
     cache.store_cache(
         question=question,
@@ -188,6 +215,9 @@ def ask_compliance_question(req: QueryRequest):
         response=final_response,
         category_filter=req.category_filter,
         entity_type=req.entity_type_filter,
+        effective_date=req.effective_date,
+        historical_mode=req.historical_mode,
+        corpus_version=getattr(settings, "CORPUS_VERSION", "3.0"),
     )
 
     elapsed_ms = (time.time() - start_time) * 1000.0

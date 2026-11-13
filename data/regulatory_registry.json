@@ -16,19 +16,22 @@
         "Lending Service Providers",
         "Digital Lending Apps"
       ],
-      "circular_number": "RBI/2025-26/36 (DOR.CRE.REC.No.17/21.07.001/2025-26)",
+      "circular_number": "RBI/2025-26/36 (DOR.STR.REC.19/21.07.001/2025-26)",
       "publication_date": "2025-05-08",
       "effective_date": "2025-05-08",
       "amendment_date": null,
       "superseded_date": null,
       "document_status": "ACTIVE",
       "version": "2.0",
-      "source_url": "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=12850&Mode=0",
-      "source_type": "official_gazette",
-      "source_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source_url": "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=12848&Mode=0",
+      "source_type": "official_rbi_processed_markdown",
+      "source_filepath": "data/processed_md/rbi_digital_lending_directions_2025.md",
+      "source_hash": "c1a4840cfca372c629ec639c28d631acdf0044f9382a26c47f5db00f1da16040",
       "downloaded_at": "2026-11-12T00:00:00Z",
-      "last_verified_at": "2026-11-12T00:00:00Z",
-      "notes": "Consolidated Digital Lending Directions 2025 formally repealing and subsuming the 2022 Digital Lending Guidelines (RBI/2022-23/111) and 2023 DLG circulars. Mandates 5% DLG portfolio cap, CIMS public DLA directory, multi-lender transparent view, direct bank account disbursal, upfront KFS, look-up cooling-off window (>=3 days for loans >=7 days, 1 day for <7 days without penalty), and strict prohibitions on DLA access to contacts, call logs, and media."
+      "last_verified_at": "2026-11-12T20:25:00Z",
+      "notes": "Consolidated Digital Lending Directions 2025 formally repealing and subsuming the 2022 Digital Lending Guidelines (RBI/2022-23/111) and 2023 DLG circulars. Mandates 5% DLG portfolio cap, CIMS public DLA directory, multi-lender transparent view, direct bank account disbursal, upfront KFS, look-up cooling-off window (>=3 days for loans >=7 days, 1 day for <7 days without penalty), and strict prohibitions on DLA access to contacts, call logs, and media.",
+      "source_hash_algorithm": "SHA-256",
+      "source_hash_scope": "processed_markdown_snapshot"
     },
     {
       "document_id": "RBI_DL_2022",
@@ -50,11 +53,14 @@
       "document_status": "REPEALED",
       "version": "1.0",
       "source_url": "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=12382&Mode=0",
-      "source_type": "official_gazette",
-      "source_hash": "a1b2c3d4e5f60718293a4b5c6d7e8f901234567890abcdef1234567890abcdef",
+      "source_type": "official_rbi_processed_markdown",
+      "source_filepath": "data/processed_md/rbi_digital_lending_guidelines.md",
+      "source_hash": "ac3b889609f0e9b7c04a7612978c596c6500293f4186c6862f013fe39ac1b0bd",
       "downloaded_at": "2026-11-09T00:00:00Z",
-      "last_verified_at": "2026-11-12T00:00:00Z",
-      "notes": "Historical regulatory circular. Formally repealed on May 8, 2025 by RBI (Digital Lending) Directions, 2025. Retained for historical audit and comparative analysis only. Must not participate in current active compliance queries."
+      "last_verified_at": "2026-11-12T20:25:00Z",
+      "notes": "Historical regulatory circular. Formally repealed on May 8, 2025 by RBI (Digital Lending) Directions, 2025. Retained for historical audit and comparative analysis only. Must not participate in current active compliance queries.",
+      "source_hash_algorithm": "SHA-256",
+      "source_hash_scope": "processed_markdown_snapshot"
     },
     {
       "document_id": "RBI_KYC_2016",
@@ -73,20 +79,23 @@
       "circular_number": "RBI/DBR/2015-16/18 (Master Direction DBR.AML.BC.No.81/14.01.001/2015-16)",
       "publication_date": "2016-02-25",
       "effective_date": "2016-02-25",
-      "amendment_date": "2024-01-04",
+      "amendment_date": "2025-08-14",
       "superseded_date": null,
       "document_status": "ACTIVE",
-      "version": "Updated as on January 04, 2024",
-      "source_url": "https://www.rbi.org.in/Scripts/BS_ViewMasDirections.aspx?id=11566",
-      "source_type": "official_gazette",
-      "source_hash": "f4c3b2a198fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b899",
+      "version": "Updated as on August 14, 2025",
+      "source_url": "https://www.rbi.org.in/commonman/Upload/English/Notification/PDFs/MD18KYCF6E92C82E1E1419D87323E3869BC9F13.pdf",
+      "source_type": "official_rbi_processed_markdown",
+      "source_filepath": "data/processed_md/rbi_kyc_master_direction.md",
+      "source_hash": "b2a6fa2f41af0c130cbf693ee2a4c6b8b1d7b44aa040300dcff59effcf80ac93",
       "downloaded_at": "2026-11-09T00:00:00Z",
-      "last_verified_at": "2026-11-12T00:00:00Z",
-      "notes": "Master Direction governing AML/CFT and Customer Due Diligence. Key provisions include Clause 38 periodic KYC update intervals (2 years for High Risk, 8 years for Medium Risk, 10 years for Low Risk); Sections 18 & 27 V-CIP technical requirements (live video session, liveness detection, geotagging within India, OTP/Aadhaar verification); PEP onboarding senior management approval; and Officially Valid Document (OVD) rules."
+      "last_verified_at": "2026-11-12T20:25:00Z",
+      "notes": "Master Direction governing AML/CFT and Customer Due Diligence. Key provisions include Clause 38 periodic KYC update intervals (2 years for High Risk, 8 years for Medium Risk, 10 years for Low Risk); Sections 18 & 27 V-CIP technical requirements (live video session, liveness detection, geotagging within India, OTP/Aadhaar verification); PEP onboarding senior management approval; and Officially Valid Document (OVD) rules.",
+      "source_hash_algorithm": "SHA-256",
+      "source_hash_scope": "processed_markdown_snapshot"
     },
     {
-      "document_id": "RBI_CYBER_2023",
-      "document_title": "Master Direction on Cyber Resilience and Digital Payment Security Controls for non-bank Payment System Operators (PSOs)",
+      "document_id": "RBI_CYBER_2024",
+      "document_title": "Master Directions on Cyber Resilience and Digital Payment Security Controls for non-bank Payment System Operators",
       "regulator": "Reserve Bank of India",
       "regulation_category": "CYBER_RESILIENCE",
       "regulated_entity_types": [
@@ -96,19 +105,25 @@
         "Cross-Border Money Transfer Operators",
         "Third-Party Application Providers"
       ],
-      "circular_number": "RBI/2023-24/80 (DoS.CO.CSITE.SEC.No.5/31.01.015/2023-24)",
-      "publication_date": "2023-11-07",
-      "effective_date": "2024-04-01",
+      "circular_number": "RBI/DPSS/2024-25/123 (CO.DPSS.OVRST.No.S447/06-26-002/2024-25)",
+      "publication_date": "2024-07-30",
+      "effective_date": "2024-07-30",
       "amendment_date": "2024-07-30",
       "superseded_date": null,
       "document_status": "ACTIVE",
       "version": "1.0",
-      "source_url": "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=12715&Mode=0",
-      "source_type": "official_gazette",
-      "source_hash": "c8b7a6d5e4f30718293a4b5c6d7e8f901234567890abcdef1234567890fedcba",
+      "aliases": [
+        "RBI_CYBER_2023"
+      ],
+      "source_url": "https://www.rbi.org.in/Scripts/BS_ViewMasDirections.aspx?id=12715",
+      "source_type": "official_rbi_processed_markdown",
+      "source_filepath": "data/processed_md/rbi_cyber_resilience_master_direction.md",
+      "source_hash": "dd06506a83e3e6785695663c8a433f1a2bf69106615983e16c1cd5dad64aea04",
       "downloaded_at": "2026-11-09T00:00:00Z",
-      "last_verified_at": "2026-11-12T00:00:00Z",
-      "notes": "Master Direction for PSOs prescribing baseline governance, risk management, and cybersecurity controls. Key mandates include Clause 14 mandatory 6-hour incident reporting to CERT-In and RBI; Board-approved Cyber Crisis Management Plan (CCMP); periodic VAPT audits; Multi-Factor Authentication (MFA) for digital payment access; and supply-chain / third-party vendor risk controls."
+      "last_verified_at": "2026-11-12T20:25:00Z",
+      "notes": "Master Direction for PSOs prescribing baseline governance, risk management, and cybersecurity controls. Key mandates include Clause 14 mandatory 6-hour incident reporting to CERT-In and RBI; Board-approved Cyber Crisis Management Plan (CCMP); periodic VAPT audits; Multi-Factor Authentication (MFA) for digital payment access; and supply-chain / third-party vendor risk controls.",
+      "source_hash_algorithm": "SHA-256",
+      "source_hash_scope": "processed_markdown_snapshot"
     }
   ]
 }

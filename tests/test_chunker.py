@@ -74,6 +74,14 @@ def test_gate_assertion_3_metadata_completeness(docstore_path):
         assert item.get("section_clause") is not None and len(item["section_clause"]) > 0, (
             f"Missing section_clause in {parent_id}"
         )
-        assert item.get("page_number", 0) > 0, (
-            f"Invalid page_number in {parent_id}: {item.get('page_number')}"
-        )
+        # Genuine page provenance: PDF-based circulars have positive int pages; HTML gazettes have None (unknown)
+        doc_id = item.get("document_id")
+        page_num = item.get("page_number")
+        if doc_id in ["RBI_KYC_2016", "RBI_CYBER_2024", "RBI_DL_2022"]:
+            assert isinstance(page_num, int) and page_num > 0, (
+                f"Invalid or missing PDF page_number in {parent_id}: {page_num}"
+            )
+        else:
+            assert page_num is None or page_num == "unknown" or (isinstance(page_num, int) and page_num > 0), (
+                f"Unexpected synthetic page_number in {parent_id}: {page_num}"
+            )

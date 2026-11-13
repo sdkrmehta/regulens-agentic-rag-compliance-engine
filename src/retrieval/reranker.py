@@ -36,11 +36,13 @@ class FlashRankReranker:
             return []
 
         limit = top_k or self.top_k
+        max_candidates = max(limit + 1, 5)
+        candidates = parent_documents[:max_candidates] if len(parent_documents) > max_candidates else parent_documents
 
         # Prepare passages for FlashRank
         passages = []
         doc_map = {}
-        for doc in parent_documents:
+        for doc in candidates:
             doc_id = doc["parent_id"]
             # Deduplicate by id if passed multiple times
             if doc_id in doc_map:
@@ -52,7 +54,7 @@ class FlashRankReranker:
                 "meta": {
                     "circular_name": doc.get("circular_name", ""),
                     "section_clause": doc.get("section_clause", ""),
-                    "page_number": doc.get("page_number", 1),
+                    "page_number": doc.get("page_number"),
                     "has_table": doc.get("has_table", False),
                 }
             })

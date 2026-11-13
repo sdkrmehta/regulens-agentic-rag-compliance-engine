@@ -90,3 +90,124 @@ def test_gate_assertion_2_entity_safe_cache_isolation():
     assert hit_low is None, (
         "Entity Guard failed! Low-Risk query incorrectly collided with High-Risk cached response."
     )
+
+
+def test_cache_multi_dimensional_isolation_all_five_dimensions():
+    """
+    Verify strict cache isolation across all 5 dimensions:
+    1. regulatory category
+    2. entity type
+    3. effective date
+    4. historical mode
+    5. corpus version
+    """
+    cache = EntityScopedSemanticCache()
+    cache.init_cache_collection(recreate=True)
+
+    base_q = "What are the record retention requirements for customer transaction logs?"
+    base_resp = CitedResponse(
+        answer="Records of customer transactions and identification must be retained for at least 5 years.",
+        citations=[
+            CitationItem(
+                circular_name="Master Direction - Know Your Customer (KYC) Direction, 2016",
+                section_clause="Section 38",
+                page_number=35,
+                verbatim_quote="shall be maintained for at least five years from the date of transaction",
+                verified=True,
+                verification_status="VERIFIED",
+            )
+        ],
+        risk_level="HIGH",
+    )
+
+    # Store baseline entry with all 5 dimensions explicitly defined
+    stored = cache.store_cache(
+        question=base_q,
+        query_type="compliance_qa",
+        extracted_entities=["kyc"],
+        response=base_resp,
+        category_filter="KYC",
+        entity_type="NBFC",
+        effective_date="2024-01-01",
+        historical_mode=False,
+        corpus_version="3.0",
+    )
+    assert stored is True
+
+    # 1. Exact match on all 5 dimensions -> CACHE HIT
+    hit = cache.check_cache(
+        question=base_q,
+        query_type="compliance_qa",
+        extracted_entities=["kyc"],
+        category_filter="KYC",
+        entity_type="NBFC",
+        effective_date="2024-01-01",
+        historical_mode=False,
+        corpus_version="3.0",
+    )
+    assert hit is not None, "Expected cache hit on identical 5-dimensional query parameters"
+
+    # 2. Divergence on category_filter -> CACHE MISS
+    hit_diff_cat = cache.check_cache(
+        question=base_q,
+        query_type="compliance_qa",
+        extracted_entities=["kyc"],
+        category_filter="DIGITAL_LENDING",
+        entity_type="NBFC",
+        effective_date="2024-01-01",
+        historical_mode=False,
+        corpus_version="3.0",
+    )
+    assert hit_diff_cat is None, "Cache isolation failed: different regulatory category must trigger cache miss"
+
+    # 3. Divergence on entity_type -> CACHE MISS
+    hit_diff_entity = cache.check_cache(
+        question=base_q,
+        query_type="compliance_qa",
+        extracted_entities=["kyc"],
+        category_filter="KYC",
+        entity_type="Commercial Bank",
+        effective_date="2024-01-01",
+        historical_mode=False,
+        corpus_version="3.0",
+    )
+    assert hit_diff_entity is None, "Cache isolation failed: different entity type must trigger cache miss"
+
+    # 4. Divergence on effective_date -> CACHE MISS
+    hit_diff_date = cache.check_cache(
+        question=base_q,
+        query_type="compliance_qa",
+        extracted_entities=["kyc"],
+        category_filter="KYC",
+        entity_type="NBFC",
+        effective_date="2025-05-08",
+        historical_mode=False,
+        corpus_version="3.0",
+    )
+    assert hit_diff_date is None, "Cache isolation failed: different effective date must trigger cache miss"
+
+    # 5. Divergence on historical_mode -> CACHE MISS
+    hit_diff_hist = cache.check_cache(
+        question=base_q,
+        query_type="compliance_qa",
+        extracted_entities=["kyc"],
+        category_filter="KYC",
+        entity_type="NBFC",
+        effective_date="2024-01-01",
+        historical_mode=True,
+        corpus_version="3.0",
+    )
+    assert hit_diff_hist is None, "Cache isolation failed: historical mode switch must trigger cache miss"
+
+    # 6. Divergence on corpus_version -> CACHE MISS
+    hit_diff_ver = cache.check_cache(
+        question=base_q,
+        query_type="compliance_qa",
+        extracted_entities=["kyc"],
+        category_filter="KYC",
+        entity_type="NBFC",
+        effective_date="2024-01-01",
+        historical_mode=False,
+        corpus_version="2.0",
+    )
+    assert hit_diff_ver is None, "Cache isolation failed: differing corpus version must trigger cache miss"

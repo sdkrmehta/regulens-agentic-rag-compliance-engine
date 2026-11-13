@@ -2,9 +2,9 @@
 
 # Reserve Bank of India (Digital Lending) Directions, 2025
 
-**Notification No.:** RBI/2025-26/36 (DOR.CRE.REC.No.17/21.07.001/2025-26)  
-**Date of Issue:** May 08, 2025  
-**Regulator:** Reserve Bank of India  
+**Notification No.:** RBI/2025-26/36 (DOR.STR.REC.19/21.07.001/2025-26)
+**Date of Issue:** May 08, 2025
+**Regulator:** Reserve Bank of India
 **Applicability:** All Commercial Banks, Primary (Urban) Co-operative Banks, State Co-operative Banks, District Central Co-operative Banks, Non-Banking Financial Companies (including Housing Finance Companies), All-India Financial Institutions (AIFIs), and their Lending Service Providers (LSPs) and Digital Lending Apps (DLAs).
 
 ---

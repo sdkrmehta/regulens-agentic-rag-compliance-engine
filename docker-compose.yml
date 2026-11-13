@@ -8,6 +8,14 @@ services:
       - "6334:6334"
     volumes:
       - qdrant_data:/qdrant/storage
+    healthcheck:
+      # Bash's TCP device issues a real HTTP request and requires a 200 status;
+      # this does not assume an HTTP client utility is installed in the Qdrant image.
+      test: ["CMD-SHELL", "bash -c 'exec 3<>/dev/tcp/127.0.0.1/6333; printf \"GET /readyz HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n\" >&3; IFS= read -r status <&3; [[ \"$$status\" == *\" 200 \"* ]]'"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 15s
 
   fastapi-backend:
     build:
@@ -18,6 +26,9 @@ services:
     command: ["uvicorn", "src.api.main:app", "--host", "0.0.0.0", "--port", "8000"]
     ports:
       - "8000:8000"
+    volumes:
+      - ./src:/app/src
+      - ./data:/app/data
     env_file:
       - .env
     environment:
@@ -25,9 +36,19 @@ services:
       - QDRANT_URL=http://qdrant:6333
       - QDRANT_HOST=qdrant
       - QDRANT_PORT=6333
-      - GROQ_API_KEY=${GROQ_API_KEY}
     depends_on:
-      - qdrant
+      qdrant:
+        condition: service_healthy
+    healthcheck:
+      # /health is a liveness stub that always returns 200 even when the
+      # docstore is empty and Qdrant is unreachable.  Use /ready instead:
+      # it validates the loaded docstore, Qdrant collection point-count,
+      # and regulatory data integrity before reporting healthy.
+      test: ["CMD-SHELL", "curl -sf http://localhost:8000/ready | python3 -c \"import sys,json; d=json.load(sys.stdin); sys.exit(0 if d.get('status')=='ready' else 1)\" || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
   streamlit-frontend:
     build:
@@ -38,6 +59,10 @@ services:
     command: ["streamlit", "run", "frontend/app.py", "--server.port", "8501", "--server.address", "0.0.0.0"]
     ports:
       - "8501:8501"
+    volumes:
+      - ./src:/app/src
+      - ./data:/app/data
+      - ./frontend:/app/frontend
     env_file:
       - .env
     environment:
@@ -46,9 +71,17 @@ services:
       - QDRANT_HOST=qdrant
       - QDRANT_PORT=6333
       - FASTAPI_URL=http://fastapi-backend:8000
-      - GROQ_API_KEY=${GROQ_API_KEY}
     depends_on:
-      - fastapi-backend
+      fastapi-backend:
+        condition: service_healthy
+    healthcheck:
+      # Streamlit exposes /_stcore/health which returns HTTP 200 only when
+      # the app process is fully loaded and accepting connections.
+      test: ["CMD-SHELL", "curl -sf http://localhost:8501/_stcore/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
 volumes:
   qdrant_data:
